@@ -140,7 +140,7 @@
 <body>
 
   <h1>🎬 YouTube Studio AI</h1>
-  <p class="subtitle">Generate multi-lingual scripts, genre-driven stories, voiceovers & scene breakdowns</p>
+  <p class="subtitle">Generate multi-lingual scripts, genre-driven stories, voiceovers & 8-10s scene breakdowns</p>
 
   <div class="input-card">
     
@@ -199,9 +199,9 @@
       <div class="form-group">
         <label for="duration">Target Duration:</label>
         <select id="duration">
-          <option value="30s">30 Seconds (Fast Short)</option>
-          <option value="60s" selected>60 Seconds (Standard Short)</option>
-          <option value="3m">Up to 3 Minutes (In-Depth Video)</option>
+          <option value="30s">30 Seconds (3 Scenes, ~8-10s each)</option>
+          <option value="60s" selected>60 Seconds (6 Scenes, ~8-10s each)</option>
+          <option value="3m">Up to 3 Minutes (18 Scenes, ~8-10s each)</option>
         </select>
       </div>
 
@@ -235,7 +235,7 @@
     <div class="tabs-header">
       <button class="tab-btn active" onclick="switchTab('tab-story', event)">📖 Full Story</button>
       <button class="tab-btn" onclick="switchTab('tab-lang', event)">🎙️ Voiceover Script</button>
-      <button class="tab-btn" onclick="switchTab('tab-scenes', event)">🎬 Scene Breakdown</button>
+      <button class="tab-btn" onclick="switchTab('tab-scenes', event)">🎬 Scene Breakdown (8-10s Each)</button>
       <button class="tab-btn" onclick="switchTab('tab-chars', event)">👤 Character Sheets</button>
       <button class="tab-btn" onclick="switchTab('tab-hook', event)">🪝 Hook & CTA</button>
       <button class="tab-btn" onclick="switchTab('tab-translator', event)">🔄 Telugu Translator</button>
@@ -265,7 +265,6 @@
   </div>
 
   <script>
-    // Detailed Categorized Topic Ideas
     const genreTopics = {
       "Epics & Heroic Sagas": [
         "The secret divine weapons of Kurukshetra war in Mahabharata",
@@ -462,12 +461,12 @@
     }
 
     function renderScenes(scenes) {
-      let html = "<h3>🎬 Scene Breakdown</h3>";
+      let html = "<h3>🎬 Scene Breakdown (Strictly 8-10 Sec Each)</h3>";
       if (Array.isArray(scenes)) {
         scenes.forEach((scene, index) => {
           html += `
             <div class="scene-box">
-              <div class="scene-title">Scene ${index + 1} (${scene.timeframe || '0:10'})</div>
+              <div class="scene-title">Scene ${index + 1} (${scene.timeframe || '8-10 sec'})</div>
               <p><strong>Voiceover:</strong> ${scene.voiceover}</p>
               <p><strong>Visual Prompt:</strong> <em>${scene.visual_prompt}</em></p>
               <p><span class="badge">Text on Screen</span> ${scene.text_on_screen}</p>
@@ -503,7 +502,7 @@
       let tagHtml = Array.isArray(tags) ? tags.map(t => `<span class="badge">#${t}</span> `).join('') : '';
 
       document.getElementById("tab-hook").innerHTML = `
-        <h3>🪝 Opening Hook</h3>
+        <h3>🪝 Opening Hook (8-10 sec)</h3>
         <div class="scene-box"><p class="telugu-text" style="color:#00ff66;">"${hook || ''}"</p></div>
         
         <h3>📢 Call To Action (CTA)</h3>
