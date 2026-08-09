@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,56 +7,92 @@
 <title>YouTube Shorts AI Generator</title>
 
 <style>
+
 body{
 font-family:Arial,sans-serif;
-max-width:900px;
-margin:auto;
-padding:20px;
 background:#f4f4f4;
+padding:20px;
+max-width:1000px;
+margin:auto;
 }
+
 h1{
 text-align:center;
 }
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
 input{
 width:100%;
 padding:12px;
 margin-top:10px;
+margin-bottom:10px;
 box-sizing:border-box;
+font-size:16px;
 }
+
 button{
 width:100%;
-padding:12px;
-margin-top:10px;
+padding:14px;
 font-size:16px;
 cursor:pointer;
+margin-top:10px;
 }
+
 textarea{
 width:100%;
-height:450px;
-margin-top:10px;
+height:500px;
+margin-top:15px;
+padding:10px;
 box-sizing:border-box;
+font-size:15px;
 }
+
+#status{
+margin-top:10px;
+font-weight:bold;
+}
+
 </style>
 </head>
 
 <body>
 
-<h1>YouTube Shorts AI Generator</h1>
+<div class="card">
+
+<h1>🎬 YouTube Shorts AI Generator</h1>
 
 <input
+type="text"
 id="topic"
 placeholder="Enter Story Topic">
 
 <input
-id="scenes"
 type="number"
+id="scenes"
 placeholder="Number of Scenes">
 
 <button onclick="generateStory()">
 Generate Story
 </button>
 
-<textarea id="output"></textarea>
+<button onclick="copyText()">
+Copy Result
+</button>
+
+<div id="status"></div>
+
+<textarea
+id="output"
+placeholder="Generated story will appear here...">
+</textarea>
+
+</div>
 
 <script>
 
@@ -71,7 +107,17 @@ document.getElementById("scenes").value;
 const output =
 document.getElementById("output");
 
-output.value = "Generating...";
+const status =
+document.getElementById("status");
+
+if(!topic){
+alert("Please enter a topic");
+return;
+}
+
+status.innerHTML = "Generating...";
+
+output.value = "";
 
 const prompt = `
 Create a viral YouTube Shorts story.
@@ -82,11 +128,15 @@ Number of Scenes: ${scenes}
 
 Generate:
 
-1. Full Story
-2. Telugu Voiceover
-3. Scene Breakdown
-4. Scene Prompts
-5. Strong CTA
+1. Hook
+2. Full Story
+3. Telugu Voiceover
+4. Scene Breakdown
+5. Scene Prompts
+6. Strong CTA
+
+Use simple Telugu.
+Make it highly engaging.
 `;
 
 try{
@@ -111,10 +161,17 @@ if(data.choices){
 output.value =
 data.choices[0].message.content;
 
-}else{
+status.innerHTML =
+"✅ Story Generated";
+
+}
+else{
 
 output.value =
 JSON.stringify(data,null,2);
+
+status.innerHTML =
+"⚠ API Response Received";
 
 }
 
@@ -123,7 +180,23 @@ JSON.stringify(data,null,2);
 output.value =
 "Error: " + error.message;
 
+status.innerHTML =
+"❌ Failed";
+
 }
+
+}
+
+function copyText(){
+
+const output =
+document.getElementById("output");
+
+output.select();
+
+document.execCommand("copy");
+
+alert("Copied!");
 
 }
 
