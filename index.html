@@ -1,75 +1,385 @@
-async function generateStory() {
+// ============================================================
+// SHORTS STORY STUDIO - FRONTEND INDEX.JS
+// ============================================================
 
-  // ============================================
-  // GET HTML ELEMENTS
-  // ============================================
+// ============================================================
+// CLOUDFLARE WORKER
+// ============================================================
 
-  const topicElement =
+const API_URL =
+  "https://yt-shorts-api.nvrsarma.workers.dev/";
+
+
+// ============================================================
+// GLOBAL STATE
+// ============================================================
+
+const state = {
+
+  topic: "",
+
+  language: "Telugu",
+
+  sceneCount: 10,
+
+  story: "",
+
+  characters: "",
+
+  scenes: "",
+
+  currentSceneStart: 1,
+
+  currentSceneEnd: 5
+
+};
+
+
+// ============================================================
+// DOM READY
+// ============================================================
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+
+    console.log(
+      "Shorts Story Studio loaded."
+    );
+
+    setupUI();
+
+  }
+);
+
+
+// ============================================================
+// SETUP UI
+// ============================================================
+
+function setupUI() {
+
+  const topic =
     document.getElementById("topic");
 
+  if (topic) {
+
+    topic.addEventListener(
+      "input",
+      function () {
+
+        if (
+          typeof showStatus === "function"
+        ) {
+
+          showStatus("");
+
+        }
+
+      }
+    );
+
+  }
+
+}
+
+
+// ============================================================
+// STATUS
+// ============================================================
+
+function showStatus(
+  message,
+  loading = false
+) {
+
+  let status =
+    document.getElementById(
+      "statusMessage"
+    );
+
+
+  if (!status) {
+
+    status =
+      document.createElement("div");
+
+    status.id =
+      "statusMessage";
+
+    status.style.cssText = `
+      position:fixed;
+      bottom:24px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:9999;
+      padding:12px 20px;
+      border-radius:14px;
+      background:#171722;
+      color:#ffffff;
+      border:1px solid rgba(255,255,255,.1);
+      box-shadow:0 10px 35px rgba(0,0,0,.35);
+      font-size:14px;
+      max-width:90%;
+      text-align:center;
+    `;
+
+    document.body.appendChild(status);
+
+  }
+
+
+  if (!message) {
+
+    status.style.display =
+      "none";
+
+    return;
+
+  }
+
+
+  status.style.display =
+    "block";
+
+
+  status.innerHTML =
+    loading
+      ? `⏳ ${escapeHTML(message)}`
+      : escapeHTML(message);
+
+}
+
+
+// ============================================================
+// ACTIVATE STEP
+// ============================================================
+
+function activateStep(
+  stepNumber
+) {
+
+  document
+    .querySelectorAll(".step")
+    .forEach(
+      function (step) {
+
+        step.classList.remove(
+          "active"
+        );
+
+      }
+    );
+
+
+  const step =
+    document.getElementById(
+      "step" + stepNumber
+    );
+
+
+  if (step) {
+
+    step.classList.add(
+      "active"
+    );
+
+  }
+
+}
+
+
+// ============================================================
+// SHOW CARD
+// ============================================================
+
+function showCard(
+  id
+) {
+
+  const card =
+    document.getElementById(id);
+
+
+  if (!card) return;
+
+
+  card.classList.remove(
+    "hidden"
+  );
+
+  card.classList.add(
+    "show"
+  );
+
+}
+
+
+// ============================================================
+// HIDE CARD
+// ============================================================
+
+function hideCard(
+  id
+) {
+
+  const card =
+    document.getElementById(id);
+
+
+  if (!card) return;
+
+
+  card.classList.remove(
+    "show"
+  );
+
+  card.classList.add(
+    "hidden"
+  );
+
+}
+
+
+// ============================================================
+// API REQUEST
+// ============================================================
+
+async function callWorker(
+  payload
+) {
+
+  console.log(
+    "Sending request:",
+    payload
+  );
+
+
+  const response =
+    await fetch(
+      API_URL,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(payload)
+
+      }
+    );
+
+
+  const raw =
+    await response.text();
+
+
+  console.log(
+    "Worker response:",
+    raw
+  );
+
+
+  let data;
+
+
+  try {
+
+    data =
+      JSON.parse(raw);
+
+  } catch (error) {
+
+    throw new Error(
+      "Worker returned invalid JSON."
+    );
+
+  }
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      data.error ||
+      "Worker request failed."
+    );
+
+  }
+
+
+  if (!data.success) {
+
+    throw new Error(
+      data.error ||
+      "AI generation failed."
+    );
+
+  }
+
+
+  return data;
+
+}
+
+
+// ============================================================
+// GENERATE STORY
+// ============================================================
+
+async function generateStory() {
+
+  const topicElement =
+    document.getElementById(
+      "topic"
+    );
+
   const languageElement =
-    document.getElementById("language");
+    document.getElementById(
+      "language"
+    );
 
   const sceneCountElement =
-    document.getElementById("sceneCount");
+    document.getElementById(
+      "sceneCount"
+    );
 
   const button =
-    document.getElementById("generateStoryBtn");
+    document.getElementById(
+      "generateStoryBtn"
+    );
 
-  const storyOutput =
-    document.getElementById("storyOutput");
-
-  const storyCard =
-    document.getElementById("storyCard");
-
-
-  // ============================================
-  // CHECK REQUIRED ELEMENTS
-  // ============================================
 
   if (!topicElement) {
 
-    alert("Topic input not found.");
+    alert(
+      "Topic input not found."
+    );
 
     return;
+
   }
 
-
-  if (!languageElement) {
-
-    alert("Language selector not found.");
-
-    return;
-  }
-
-
-  if (!sceneCountElement) {
-
-    alert("Scene count selector not found.");
-
-    return;
-  }
-
-
-  // ============================================
-  // READ USER INPUT
-  // ============================================
 
   const topic =
     topicElement.value.trim();
 
+
   const language =
-    languageElement.value;
+    languageElement
+      ? languageElement.value
+      : "Telugu";
+
 
   const sceneCount =
-    Number(
-      sceneCountElement.value
-    );
+    sceneCountElement
+      ? Number(
+          sceneCountElement.value
+        )
+      : 10;
 
-
-  // ============================================
-  // VALIDATE TOPIC
-  // ============================================
 
   if (!topic) {
 
@@ -80,301 +390,93 @@ async function generateStory() {
     topicElement.focus();
 
     return;
+
   }
 
 
-  // ============================================
-  // VALIDATE SCENE COUNT
-  // ============================================
+  state.topic =
+    topic;
 
-  if (
-    !Number.isInteger(sceneCount) ||
-    sceneCount < 1
-  ) {
+  state.language =
+    language;
 
-    alert(
-      "Please select a valid number of scenes."
-    );
+  state.sceneCount =
+    sceneCount;
 
-    return;
-  }
-
-
-  // ============================================
-  // SAVE STATE
-  // ============================================
-
-  if (
-    typeof state !== "undefined"
-  ) {
-
-    state.topic =
-      topic;
-
-    state.language =
-      language;
-
-    state.sceneCount =
-      sceneCount;
-  }
-
-
-  // ============================================
-  // BUTTON LOADING
-  // ============================================
 
   if (button) {
 
     button.disabled =
       true;
 
-    button.textContent =
-      "⏳ Generating Story...";
+    button.innerHTML =
+      "⏳ Creating Story...";
+
   }
 
 
-  // ============================================
-  // STATUS
-  // ============================================
-
-  if (
-    typeof showStatus === "function"
-  ) {
-
-    showStatus(
-      "Creating your story...",
-      true
-    );
-  }
-
-
-  // ============================================
-  // CLOUDFLARE WORKER URL
-  // ============================================
-
-  const WORKER_URL =
-    "https://yt-shorts-api.nvrsarma.workers.dev/";
+  showStatus(
+    "Creating your cinematic story...",
+    true
+  );
 
 
   try {
 
-    // ==========================================
-    // SEND REQUEST
-    // ==========================================
+    const data =
+      await callWorker({
 
-    const response =
-      await fetch(
-        WORKER_URL,
-        {
-          method: "POST",
+        action: "story",
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+        topic:
+          topic,
 
-          body: JSON.stringify({
+        language:
+          language,
 
-            action: "story",
+        sceneCount:
+          sceneCount
 
-            topic: topic,
-
-            language: language,
-
-            sceneCount: sceneCount
-
-          })
-        }
-      );
+      });
 
 
-    // ==========================================
-    // READ RESPONSE
-    // ==========================================
-
-    const rawResponse =
-      await response.text();
+    state.story =
+      data.content || "";
 
 
-    console.log(
-      "WORKER STATUS:",
-      response.status
-    );
-
-
-    console.log(
-      "WORKER RESPONSE:",
-      rawResponse
-    );
-
-
-    // ==========================================
-    // PARSE JSON
-    // ==========================================
-
-    let data;
-
-    try {
-
-      data =
-        JSON.parse(
-          rawResponse
-        );
-
-    } catch (jsonError) {
-
-      console.error(
-        "JSON ERROR:",
-        jsonError
-      );
-
-      throw new Error(
-        "Worker returned invalid JSON."
-      );
-    }
-
-
-    // ==========================================
-    // CHECK HTTP STATUS
-    // ==========================================
-
-    if (!response.ok) {
-
-      throw new Error(
-        data.error ||
-        "Worker request failed."
-      );
-    }
-
-
-    // ==========================================
-    // CHECK SUCCESS
-    // ==========================================
-
-    if (
-      data.success !== true
-    ) {
-
-      throw new Error(
-        data.error ||
-        "Story generation failed."
-      );
-    }
-
-
-    // ==========================================
-    // GET STORY
-    // ==========================================
-
-    const generatedStory =
-      String(
-        data.content || ""
-      ).trim();
-
-
-    // ==========================================
-    // CHECK EMPTY STORY
-    // ==========================================
-
-    if (!generatedStory) {
+    if (!state.story.trim()) {
 
       throw new Error(
         "AI returned an empty story."
       );
+
     }
 
 
-    // ==========================================
-    // SAVE STORY
-    // ==========================================
-
-    if (
-      typeof state !== "undefined"
-    ) {
-
-      state.story =
-        generatedStory;
-    }
+    renderStory(
+      state.story
+    );
 
 
-    // ==========================================
-    // DISPLAY STORY
-    // ==========================================
-
-    if (storyOutput) {
-
-      storyOutput.textContent =
-        generatedStory;
-    }
+    showCard(
+      "storyCard"
+    );
 
 
-    // ==========================================
-    // SHOW STORY CARD
-    // ==========================================
-
-    if (storyCard) {
-
-      storyCard.classList.remove(
-        "hidden"
-      );
-
-      storyCard.classList.add(
-        "show"
-      );
-    }
+    activateStep(2);
 
 
-    // ==========================================
-    // ACTIVATE STORY STEP
-    // ==========================================
-
-    if (
-      typeof activateStep === "function"
-    ) {
-
-      activateStep(2);
-    }
+    showStatus(
+      "✅ Story generated successfully."
+    );
 
 
-    // ==========================================
-    // SUCCESS STATUS
-    // ==========================================
-
-    if (
-      typeof showStatus === "function"
-    ) {
-
-      showStatus(
-        "✅ Story generated successfully."
-      );
-    }
-
-
-    // ==========================================
-    // SCROLL TO STORY
-    // ==========================================
-
-    if (storyCard) {
-
-      setTimeout(
-        function () {
-
-          storyCard.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-          });
-
-        },
-        100
-      );
-    }
+    scrollToCard(
+      "storyCard"
+    );
 
 
   } catch (error) {
-
-    // ==========================================
-    // ERROR
-    // ==========================================
 
     console.error(
       "STORY ERROR:",
@@ -382,43 +484,1212 @@ async function generateStory() {
     );
 
 
-    const errorMessage =
-      error &&
+    showStatus(
+      "❌ " +
       error.message
-        ? error.message
-        : "Story generation failed.";
-
-
-    if (
-      typeof showStatus === "function"
-    ) {
-
-      showStatus(
-        "❌ " +
-        errorMessage
-      );
-    }
+    );
 
 
     alert(
       "Story generation failed:\n\n" +
-      errorMessage
+      error.message
     );
 
 
   } finally {
-
-    // ==========================================
-    // RESTORE BUTTON
-    // ==========================================
 
     if (button) {
 
       button.disabled =
         false;
 
-      button.textContent =
+      button.innerHTML =
         "✨ Generate Story";
+
     }
+
   }
+
 }
+
+
+// ============================================================
+// RENDER STORY - RICH UI
+// ============================================================
+
+function renderStory(
+  story
+) {
+
+  const output =
+    document.getElementById(
+      "storyOutput"
+    );
+
+
+  if (!output) return;
+
+
+  const formatted =
+    formatAIContent(
+      story
+    );
+
+
+  output.innerHTML = `
+
+    <div class="rich-story">
+
+      <div class="story-toolbar">
+
+        <div class="story-type">
+          ✨ AI GENERATED STORY
+        </div>
+
+        <div class="story-meta">
+
+          <span>
+            🌐 ${escapeHTML(state.language)}
+          </span>
+
+          <span>
+            🎬 ${state.sceneCount} Scenes
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="story-body">
+
+        ${formatted}
+
+      </div>
+
+
+      <div class="story-footer">
+
+        <div>
+          📖 Review your story before continuing.
+        </div>
+
+        <div>
+          ✅ Ready for character generation
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+// ============================================================
+// FORMAT AI CONTENT
+// ============================================================
+
+function formatAIContent(
+  text
+) {
+
+  let safe =
+    escapeHTML(
+      text
+    );
+
+
+  safe =
+    safe.replace(
+      /^# (.+)$/gm,
+      `<h2>$1</h2>`
+    );
+
+
+  safe =
+    safe.replace(
+      /^## (.+)$/gm,
+      `<h3>$1</h3>`
+    );
+
+
+  safe =
+    safe.replace(
+      /\*\*(.*?)\*\*/g,
+      `<strong>$1</strong>`
+    );
+
+
+  safe =
+    safe.replace(
+      /\n{2,}/g,
+      "</p><p>"
+    );
+
+
+  safe =
+    safe.replace(
+      /\n/g,
+      "<br>"
+    );
+
+
+  return `<p>${safe}</p>`;
+
+}
+
+
+// ============================================================
+// APPROVE STORY
+// ============================================================
+
+function approveStory() {
+
+  if (!state.story) {
+
+    alert(
+      "Please generate a story first."
+    );
+
+    return;
+
+  }
+
+
+  showStatus(
+    "Generating character sheets...",
+    true
+  );
+
+
+  generateCharacters();
+
+}
+
+
+// ============================================================
+// GENERATE CHARACTERS
+// ============================================================
+
+async function generateCharacters() {
+
+  const button =
+    document.querySelector(
+      "#storyCard .success"
+    );
+
+
+  if (button) {
+
+    button.disabled =
+      true;
+
+    button.innerHTML =
+      "⏳ Generating...";
+
+  }
+
+
+  try {
+
+    const data =
+      await callWorker({
+
+        action:
+          "characters",
+
+        topic:
+          state.topic,
+
+        language:
+          state.language,
+
+        sceneCount:
+          state.sceneCount,
+
+        story:
+          state.story
+
+      });
+
+
+    state.characters =
+      data.content || "";
+
+
+    if (
+      !state.characters.trim()
+    ) {
+
+      throw new Error(
+        "AI returned empty character sheets."
+      );
+
+    }
+
+
+    renderCharacters(
+      state.characters
+    );
+
+
+    showCard(
+      "characterCard"
+    );
+
+
+    activateStep(3);
+
+
+    showStatus(
+      "✅ Character sheets generated."
+    );
+
+
+    scrollToCard(
+      "characterCard"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "CHARACTER ERROR:",
+      error
+    );
+
+
+    showStatus(
+      "❌ " +
+      error.message
+    );
+
+
+    alert(
+      "Character generation failed:\n\n" +
+      error.message
+    );
+
+
+  } finally {
+
+    if (button) {
+
+      button.disabled =
+        false;
+
+      button.innerHTML =
+        "🎭 Generate Characters";
+
+    }
+
+  }
+
+}
+
+
+// ============================================================
+// RENDER CHARACTERS
+// ============================================================
+
+function renderCharacters(
+  characters
+) {
+
+  const output =
+    document.getElementById(
+      "characterOutput"
+    );
+
+
+  if (!output) return;
+
+
+  output.innerHTML = `
+
+    <div class="rich-characters">
+
+      <div class="character-header">
+
+        <div>
+          <div class="rich-title">
+            👤 Character Reference Sheets
+          </div>
+
+          <div class="rich-subtitle">
+            Production-ready cinematic character prompts
+          </div>
+        </div>
+
+        <div class="rich-badge">
+          🎬 FILM READY
+        </div>
+
+      </div>
+
+
+      <div class="character-content">
+
+        ${formatAIContent(
+          characters
+        )}
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+// ============================================================
+// GENERATE SCENES
+// ============================================================
+
+async function generateScenes() {
+
+  if (!state.story) {
+
+    alert(
+      "Please generate and approve the story first."
+    );
+
+    return;
+
+  }
+
+
+  if (!state.characters) {
+
+    alert(
+      "Please generate character sheets first."
+    );
+
+    return;
+
+  }
+
+
+  state.currentSceneStart =
+    1;
+
+
+  state.currentSceneEnd =
+    Math.min(
+      5,
+      state.sceneCount
+    );
+
+
+  await requestScenes(
+    state.currentSceneStart,
+    state.currentSceneEnd
+  );
+
+}
+
+
+// ============================================================
+// REQUEST SCENES
+// ============================================================
+
+async function requestScenes(
+  startScene,
+  endScene
+) {
+
+  showStatus(
+    `Creating Scenes ${startScene}–${endScene}...`,
+    true
+  );
+
+
+  const button =
+    document.getElementById(
+      "nextBtn"
+    );
+
+
+  if (button) {
+
+    button.disabled =
+      true;
+
+    button.innerHTML =
+      "⏳ Generating...";
+
+  }
+
+
+  try {
+
+    const data =
+      await callWorker({
+
+        action:
+          "scenes",
+
+        topic:
+          state.topic,
+
+        language:
+          state.language,
+
+        sceneCount:
+          state.sceneCount,
+
+        story:
+          state.story,
+
+        characters:
+          state.characters,
+
+        startScene:
+          startScene,
+
+        endScene:
+          endScene
+
+      });
+
+
+    const newScenes =
+      data.content || "";
+
+
+    if (!newScenes.trim()) {
+
+      throw new Error(
+        "AI returned empty scene prompts."
+      );
+
+    }
+
+
+    if (
+      state.scenes
+    ) {
+
+      state.scenes +=
+        "\n\n" +
+        newScenes;
+
+    } else {
+
+      state.scenes =
+        newScenes;
+
+    }
+
+
+    renderScenes(
+      state.scenes,
+      startScene,
+      endScene
+    );
+
+
+    showCard(
+      "sceneCard"
+    );
+
+
+    activateStep(4);
+
+
+    showStatus(
+      `✅ Scenes ${startScene}–${endScene} generated.`
+    );
+
+
+    scrollToCard(
+      "sceneCard"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "SCENE ERROR:",
+      error
+    );
+
+
+    showStatus(
+      "❌ " +
+      error.message
+    );
+
+
+    alert(
+      "Scene generation failed:\n\n" +
+      error.message
+    );
+
+
+  } finally {
+
+    if (button) {
+
+      button.disabled =
+        false;
+
+      button.innerHTML =
+        "➡️ NEXT";
+
+    }
+
+  }
+
+}
+
+
+// ============================================================
+// NEXT SCENES
+// ============================================================
+
+async function nextScenes() {
+
+  const nextStart =
+    state.currentSceneEnd + 1;
+
+
+  if (
+    nextStart >
+    state.sceneCount
+  ) {
+
+    showStatus(
+      "🎉 All scenes completed!"
+    );
+
+
+    activateStep(5);
+
+    return;
+
+  }
+
+
+  const nextEnd =
+    Math.min(
+      nextStart + 4,
+      state.sceneCount
+    );
+
+
+  state.currentSceneStart =
+    nextStart;
+
+  state.currentSceneEnd =
+    nextEnd;
+
+
+  await requestScenes(
+    nextStart,
+    nextEnd
+  );
+
+}
+
+
+// ============================================================
+// RENDER SCENES
+// ============================================================
+
+function renderScenes(
+  scenes,
+  startScene,
+  endScene
+) {
+
+  const output =
+    document.getElementById(
+      "sceneOutput"
+    );
+
+
+  const subtitle =
+    document.getElementById(
+      "sceneSubtitle"
+    );
+
+
+  const counter =
+    document.getElementById(
+      "sceneCounter"
+    );
+
+
+  const nextButton =
+    document.getElementById(
+      "nextBtn"
+    );
+
+
+  if (output) {
+
+    output.innerHTML = `
+
+      <div class="scene-rich-container">
+
+        <div class="scene-topbar">
+
+          <div class="scene-label">
+            🎥 CINEMATIC VIDEO PROMPTS
+          </div>
+
+          <div class="scene-range">
+            Scenes ${startScene}–${endScene}
+          </div>
+
+        </div>
+
+
+        <div class="scene-content">
+
+          ${formatScenePrompts(
+            scenes
+          )}
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  if (subtitle) {
+
+    subtitle.textContent =
+      `Scenes ${startScene}–${endScene}`;
+
+  }
+
+
+  if (counter) {
+
+    counter.textContent =
+      `Scenes ${startScene}–${endScene}`;
+
+  }
+
+
+  if (nextButton) {
+
+    if (
+      endScene >=
+      state.sceneCount
+    ) {
+
+      nextButton.innerHTML =
+        "🎉 Finish";
+
+    } else {
+
+      nextButton.innerHTML =
+        "➡️ NEXT";
+
+    }
+
+  }
+
+}
+
+
+// ============================================================
+// FORMAT SCENE PROMPTS
+// ============================================================
+
+function formatScenePrompts(
+  text
+) {
+
+  const lines =
+    text.split("\n");
+
+
+  let html = "";
+
+  let currentScene =
+    null;
+
+
+  lines.forEach(
+    function (line) {
+
+      const trimmed =
+        line.trim();
+
+
+      const match =
+        trimmed.match(
+          /^SCENE\s+(\d+)/i
+        );
+
+
+      if (match) {
+
+        if (currentScene) {
+
+          html +=
+            "</div></div>";
+
+        }
+
+
+        currentScene =
+          match[1];
+
+
+        html += `
+
+          <div class="scene-card">
+
+            <div class="scene-card-header">
+
+              <span>
+                🎬 SCENE ${currentScene}
+              </span>
+
+              <span>
+                10 SEC
+              </span>
+
+            </div>
+
+            <div class="scene-prompt">
+
+        `;
+
+
+        return;
+
+      }
+
+
+      if (trimmed) {
+
+        html +=
+          `<p>${escapeHTML(trimmed)}</p>`;
+
+      }
+
+    }
+  );
+
+
+  if (currentScene) {
+
+    html +=
+      "</div></div>";
+
+  }
+
+
+  if (!html.trim()) {
+
+    return formatAIContent(
+      text
+    );
+
+  }
+
+
+  return html;
+
+}
+
+
+// ============================================================
+// REGENERATE STORY
+// ============================================================
+
+async function regenerateStory() {
+
+  const topicElement =
+    document.getElementById(
+      "topic"
+    );
+
+
+  if (topicElement) {
+
+    topicElement.focus();
+
+  }
+
+
+  await generateStory();
+
+}
+
+
+// ============================================================
+// COPY OUTPUT
+// ============================================================
+
+async function copyOutput(
+  elementId
+) {
+
+  const element =
+    document.getElementById(
+      elementId
+    );
+
+
+  if (!element) {
+
+    alert(
+      "Output not found."
+    );
+
+    return;
+
+  }
+
+
+  const text =
+    element.innerText ||
+    element.textContent ||
+    "";
+
+
+  try {
+
+    await navigator.clipboard.writeText(
+      text
+    );
+
+
+    showStatus(
+      "📋 Copied successfully!"
+    );
+
+
+  } catch (error) {
+
+    const textarea =
+      document.createElement(
+        "textarea"
+      );
+
+
+    textarea.value =
+      text;
+
+
+    document.body.appendChild(
+      textarea
+    );
+
+
+    textarea.select();
+
+
+    document.execCommand(
+      "copy"
+    );
+
+
+    textarea.remove();
+
+
+    showStatus(
+      "📋 Copied successfully!"
+    );
+
+  }
+
+}
+
+
+// ============================================================
+// CLEAR EVERYTHING
+// ============================================================
+
+function clearEverything() {
+
+  const confirmed =
+    confirm(
+      "Clear the current project?"
+    );
+
+
+  if (!confirmed) return;
+
+
+  state.topic = "";
+  state.language = "Telugu";
+  state.sceneCount = 10;
+  state.story = "";
+  state.characters = "";
+  state.scenes = "";
+  state.currentSceneStart = 1;
+  state.currentSceneEnd = 5;
+
+
+  const topic =
+    document.getElementById(
+      "topic"
+    );
+
+
+  if (topic) {
+
+    topic.value = "";
+
+  }
+
+
+  const storyOutput =
+    document.getElementById(
+      "storyOutput"
+    );
+
+
+  if (storyOutput) {
+
+    storyOutput.innerHTML = "";
+
+  }
+
+
+  const characterOutput =
+    document.getElementById(
+      "characterOutput"
+    );
+
+
+  if (characterOutput) {
+
+    characterOutput.innerHTML = "";
+
+  }
+
+
+  const sceneOutput =
+    document.getElementById(
+      "sceneOutput"
+    );
+
+
+  if (sceneOutput) {
+
+    sceneOutput.innerHTML = "";
+
+  }
+
+
+  hideCard(
+    "storyCard"
+  );
+
+  hideCard(
+    "characterCard"
+  );
+
+  hideCard(
+    "sceneCard"
+  );
+
+
+  activateStep(1);
+
+
+  showStatus(
+    "Project cleared."
+  );
+
+}
+
+
+// ============================================================
+// SCROLL
+// ============================================================
+
+function scrollToCard(
+  id
+) {
+
+  const element =
+    document.getElementById(id);
+
+
+  if (!element) return;
+
+
+  setTimeout(
+    function () {
+
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    },
+    150
+  );
+
+}
+
+
+// ============================================================
+// HTML ESCAPE
+// ============================================================
+
+function escapeHTML(
+  value
+) {
+
+  return String(value)
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+// ============================================================
+// EXPORT PROJECT
+// ============================================================
+
+function exportProject() {
+
+  const project = {
+
+    title:
+      "Shorts Story Studio",
+
+    topic:
+      state.topic,
+
+    language:
+      state.language,
+
+    sceneCount:
+      state.sceneCount,
+
+    story:
+      state.story,
+
+    characters:
+      state.characters,
+
+    scenes:
+      state.scenes
+
+  };
+
+
+  const blob =
+    new Blob(
+      [
+        JSON.stringify(
+          project,
+          null,
+          2
+        )
+      ],
+      {
+        type:
+          "application/json"
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+
+  link.href =
+    url;
+
+  link.download =
+    "shorts-story-project.json";
+
+
+  document.body.appendChild(
+    link
+  );
+
+
+  link.click();
+
+
+  link.remove();
+
+
+  URL.revokeObjectURL(
+    url
+  );
+
+
+  showStatus(
+    "📦 Project exported."
+  );
+
+}
+
+
+// ============================================================
+// MAKE FUNCTIONS AVAILABLE TO HTML
+// ============================================================
+
+window.generateStory =
+  generateStory;
+
+window.approveStory =
+  approveStory;
+
+window.generateCharacters =
+  generateCharacters;
+
+window.generateScenes =
+  generateScenes;
+
+window.nextScenes =
+  nextScenes;
+
+window.regenerateStory =
+  regenerateStory;
+
+window.copyOutput =
+  copyOutput;
+
+window.clearEverything =
+  clearEverything;
+
+window.exportProject =
+  exportProject;
