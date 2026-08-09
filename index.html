@@ -1,339 +1,1499 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>YouTube Shorts AI Generator</title>
+  <title>Shorts Story Studio</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-<style>
+    body {
+      font-family: Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, #25205c 0%, transparent 35%),
+        radial-gradient(circle at bottom right, #4b164c 0%, transparent 35%),
+        #090914;
+      color: #fff;
+      min-height: 100vh;
+    }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
+    button,
+    textarea,
+    input,
+    select {
+      font: inherit;
+    }
 
-body{
-background:#0f172a;
-padding:20px;
-color:white;
-}
+    .app {
+      width: min(1100px, 94%);
+      margin: auto;
+      padding: 25px 0 60px;
+    }
 
-.container{
-max-width:1000px;
-margin:auto;
-}
+    /* HEADER */
 
-.header{
-text-align:center;
-margin-bottom:30px;
-}
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
 
-.header h1{
-font-size:42px;
-color:#ffffff;
-}
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
 
-.header p{
-color:#94a3b8;
-margin-top:10px;
-}
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      font-size: 24px;
+      box-shadow: 0 10px 35px rgba(124, 58, 237, .35);
+    }
 
-.card{
-background:#1e293b;
-padding:25px;
-border-radius:20px;
-box-shadow:0 0 25px rgba(0,0,0,.25);
-}
+    .brand h1 {
+      font-size: 21px;
+    }
 
-input{
-width:100%;
-padding:14px;
-margin-top:12px;
-background:#0f172a;
-border:1px solid #334155;
-border-radius:12px;
-color:white;
-font-size:16px;
-}
+    .brand p {
+      color: #9696ad;
+      font-size: 12px;
+      margin-top: 3px;
+    }
 
-button{
-width:100%;
-padding:15px;
-margin-top:15px;
-border:none;
-border-radius:12px;
-background:#ff0000;
-color:white;
-font-size:16px;
-font-weight:600;
-cursor:pointer;
-}
+    .badge {
+      background: rgba(34, 197, 94, .12);
+      border: 1px solid rgba(34, 197, 94, .3);
+      color: #6ee7a0;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
 
-button:hover{
-opacity:.9;
-}
+    /* CARD */
 
-.copyBtn{
-background:#2563eb;
-}
+    .card {
+      background: rgba(20, 20, 35, .88);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 22px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.22);
+      backdrop-filter: blur(15px);
+    }
 
-.downloadBtn{
-background:#16a34a;
-}
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
 
-.status{
-margin-top:15px;
-font-weight:600;
-}
+    .card-subtitle {
+      color: #8f8fa5;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
 
-.output{
-margin-top:25px;
-background:#0f172a;
-padding:25px;
-border-radius:15px;
-line-height:1.8;
-white-space:pre-wrap;
-min-height:250px;
-border:1px solid #334155;
-overflow:auto;
-}
+    /* INPUT */
 
-.output h1,
-.output h2,
-.output h3{
-margin-top:15px;
-margin-bottom:10px;
-color:#38bdf8;
-}
+    textarea,
+    input,
+    select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.1);
+      background: #11111e;
+      color: #fff;
+      border-radius: 14px;
+      outline: none;
+      transition: .2s;
+    }
 
-.loader{
-display:none;
-margin-top:20px;
-text-align:center;
-}
+    textarea {
+      min-height: 120px;
+      padding: 15px;
+      resize: vertical;
+      line-height: 1.6;
+    }
 
-.spinner{
-width:40px;
-height:40px;
-border:4px solid #334155;
-border-top:4px solid #38bdf8;
-border-radius:50%;
-animation:spin 1s linear infinite;
-margin:auto;
-}
+    input,
+    select {
+      height: 50px;
+      padding: 0 14px;
+    }
 
-@keyframes spin{
-100%{
-transform:rotate(360deg);
-}
-}
+    textarea:focus,
+    input:focus,
+    select:focus {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 3px rgba(139,92,246,.12);
+    }
 
-</style>
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 180px;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    /* BUTTONS */
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      border-radius: 13px;
+      padding: 12px 18px;
+      font-weight: 700;
+      transition: .2s;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: white;
+      box-shadow: 0 10px 30px rgba(124,58,237,.25);
+    }
+
+    .secondary {
+      background: #252538;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .success {
+      background: linear-gradient(135deg,#059669,#22c55e);
+      color: white;
+    }
+
+    .danger {
+      background: #321a23;
+      color: #ff9aaa;
+    }
+
+    /* WORKFLOW */
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(5,1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .step {
+      padding: 12px 8px;
+      text-align: center;
+      background: #141421;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 12px;
+      color: #77778c;
+      font-size: 11px;
+    }
+
+    .step.active {
+      color: #fff;
+      border-color: #8b5cf6;
+      background: rgba(124,58,237,.15);
+    }
+
+    .step.done {
+      color: #6ee7a0;
+    }
+
+    /* OUTPUT */
+
+    .output-card {
+      display: none;
+    }
+
+    .output-card.show {
+      display: block;
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .output-content {
+      background: #0d0d18;
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px;
+      padding: 20px;
+      line-height: 1.85;
+      color: #e8e8f0;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      max-height: 650px;
+      overflow-y: auto;
+    }
+
+    /* STATUS */
+
+    .status {
+      display: none;
+      margin-bottom: 15px;
+      padding: 13px 15px;
+      border-radius: 13px;
+      background: rgba(59,130,246,.1);
+      border: 1px solid rgba(59,130,246,.2);
+      color: #93c5fd;
+      font-size: 13px;
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    .loader {
+      width: 15px;
+      height: 15px;
+      border: 2px solid rgba(255,255,255,.25);
+      border-top-color: #fff;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin .7s linear infinite;
+      vertical-align: -2px;
+      margin-right: 7px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* CHARACTER / SCENE */
+
+    .hidden {
+      display: none !important;
+    }
+
+    .phase-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+
+    .counter {
+      color: #9696ad;
+      font-size: 12px;
+    }
+
+    /* MOBILE */
+
+    @media(max-width:700px) {
+
+      .app {
+        width: 94%;
+        padding-top: 16px;
+      }
+
+      .header {
+        align-items: flex-start;
+      }
+
+      .badge {
+        display: none;
+      }
+
+      .workflow {
+        grid-template-columns: repeat(2,1fr);
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 17px;
+        border-radius: 18px;
+      }
+
+      .output-content {
+        padding: 15px;
+        font-size: 14px;
+      }
+
+      .buttons button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="app">
 
-<div class="header">
-<h1>🎬 YouTube Shorts AI Generator</h1>
-<p>Create Viral Shorts Stories, Voiceovers & Scene Prompts</p>
+  <!-- HEADER -->
+
+  <header class="header">
+
+    <div class="brand">
+
+      <div class="logo">🎬</div>
+
+      <div>
+        <h1>Shorts Story Studio</h1>
+        <p>AI-powered YouTube Shorts creator</p>
+      </div>
+
+    </div>
+
+    <div class="badge">
+      ● Free AI Mode
+    </div>
+
+  </header>
+
+
+  <!-- WORKFLOW -->
+
+  <div class="workflow">
+
+    <div class="step active" id="step1">
+      ① Topic
+    </div>
+
+    <div class="step" id="step2">
+      ② Story
+    </div>
+
+    <div class="step" id="step3">
+      ③ Characters
+    </div>
+
+    <div class="step" id="step4">
+      ④ Scenes
+    </div>
+
+    <div class="step" id="step5">
+      ⑤ Export
+    </div>
+
+  </div>
+
+
+  <!-- INPUT -->
+
+  <section class="card">
+
+    <div class="card-title">
+      Create Your Story
+    </div>
+
+    <div class="card-subtitle">
+      Start with a topic, What-If idea, historical event, mythological concept,
+      or original story.
+    </div>
+
+    <textarea
+      id="topic"
+      placeholder="Example: What if Arjuna didn't kill Karna?"
+    ></textarea>
+
+    <div class="controls">
+
+      <div>
+        <label style="display:block;color:#88889d;font-size:12px;margin-bottom:7px;">
+          Language
+        </label>
+
+        <select id="language">
+          <option value="Telugu">Telugu</option>
+          <option value="English">English</option>
+          <option value="Hindi">Hindi</option>
+          <option value="Tamil">Tamil</option>
+          <option value="Kannada">Kannada</option>
+        </select>
+      </div>
+
+
+      <div>
+        <label style="display:block;color:#88889d;font-size:12px;margin-bottom:7px;">
+          Number of Scenes
+        </label>
+
+        <select id="sceneCount">
+
+          <option value="6">6 Scenes</option>
+          <option value="7">7 Scenes</option>
+          <option value="8">8 Scenes</option>
+          <option value="9">9 Scenes</option>
+          <option value="10" selected>10 Scenes</option>
+          <option value="12">12 Scenes</option>
+          <option value="15">15 Scenes</option>
+          <option value="20">20 Scenes</option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <div class="buttons">
+
+      <button
+        class="primary"
+        id="generateStoryBtn"
+        onclick="generateStory()"
+      >
+        ✨ Generate Story
+      </button>
+
+      <button
+        class="secondary"
+        onclick="clearEverything()"
+      >
+        Clear
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- STATUS -->
+
+  <div
+    class="status"
+    id="status"
+  ></div>
+
+
+  <!-- STORY -->
+
+  <section
+    class="card output-card"
+    id="storyCard"
+  >
+
+    <div class="output-header">
+
+      <div>
+        <div class="card-title">
+          📖 Your Story
+        </div>
+
+        <div class="card-subtitle">
+          Review the story before continuing.
+        </div>
+      </div>
+
+      <button
+        class="secondary"
+        onclick="copyOutput('storyOutput')"
+      >
+        📋 Copy
+      </button>
+
+    </div>
+
+    <div
+      class="output-content"
+      id="storyOutput"
+    ></div>
+
+
+    <div class="phase-actions">
+
+      <span class="counter">
+        Story generation complete
+      </span>
+
+      <div class="buttons" style="margin-top:0">
+
+        <button
+          class="danger"
+          onclick="regenerateStory()"
+        >
+          🔄 Regenerate
+        </button>
+
+        <button
+          class="success"
+          onclick="approveStory()"
+        >
+          ✅ Story Approved
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- CHARACTERS -->
+
+  <section
+    class="card output-card"
+    id="characterCard"
+  >
+
+    <div class="output-header">
+
+      <div>
+        <div class="card-title">
+          👤 Character Sheets
+        </div>
+
+        <div class="card-subtitle">
+          Production-ready character references.
+        </div>
+      </div>
+
+      <button
+        class="secondary"
+        onclick="copyOutput('characterOutput')"
+      >
+        📋 Copy
+      </button>
+
+    </div>
+
+    <div
+      class="output-content"
+      id="characterOutput"
+    ></div>
+
+
+    <div class="phase-actions">
+
+      <span class="counter">
+        Characters generated
+      </span>
+
+      <button
+        class="primary"
+        onclick="generateScenes()"
+      >
+        🎬 Generate Scenes 1–5
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- SCENES -->
+
+  <section
+    class="card output-card"
+    id="sceneCard"
+  >
+
+    <div class="output-header">
+
+      <div>
+        <div class="card-title">
+          🎥 Video Scene Prompts
+        </div>
+
+        <div
+          class="card-subtitle"
+          id="sceneSubtitle"
+        >
+          Scenes 1–5
+        </div>
+
+      </div>
+
+      <button
+        class="secondary"
+        onclick="copyOutput('sceneOutput')"
+      >
+        📋 Copy
+      </button>
+
+    </div>
+
+
+    <div
+      class="output-content"
+      id="sceneOutput"
+    ></div>
+
+
+    <div class="phase-actions">
+
+      <span
+        class="counter"
+        id="sceneCounter"
+      >
+        Scenes 1–5
+      </span>
+
+      <button
+        class="primary"
+        id="nextBtn"
+        onclick="nextScenes()"
+      >
+        ➡️ NEXT
+      </button>
+
+    </div>
+
+  </section>
+
+
 </div>
 
-<div class="card">
-
-<input
-id="topic"
-placeholder="Enter Story Topic">
-
-<input
-id="scenes"
-type="number"
-placeholder="Number of Scenes">
-
-<button onclick="generateStory()">
-🚀 Generate Story
-</button>
-
-<button class="copyBtn" onclick="copyStory()">
-📋 Copy Story
-</button>
-
-<button class="downloadBtn" onclick="downloadStory()">
-📥 Download TXT
-</button>
-
-<div id="status" class="status"></div>
-
-<div class="loader" id="loader">
-<div class="spinner"></div>
-<p>Generating AI Content...</p>
-</div>
-
-<div id="output" class="output">
-Generated story will appear here...
-</div>
-
-</div>
-
-</div>
 
 <script>
 
-function formatContent(text){
+/* =========================================================
+   CONFIGURATION
+   ========================================================= */
 
-return text
-.replace(/^# (.*)$/gm,'<h1>$1</h1>')
-.replace(/^## (.*)$/gm,'<h2>$1</h2>')
-.replace(/^### (.*)$/gm,'<h3>$1</h3>')
-.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-.replace(/\n/g,'<br>');
+/*
+   IMPORTANT:
+   Change this to your Cloudflare Worker URL.
+
+   Example:
+
+   const API_URL =
+   "https://your-worker-name.your-subdomain.workers.dev";
+*/
+
+const API_URL = "YOUR_WORKER_URL_HERE";
+
+
+/* =========================================================
+   STATE
+   ========================================================= */
+
+let state = {
+
+  topic: "",
+
+  language: "Telugu",
+
+  sceneCount: 10,
+
+  story: "",
+
+  characters: "",
+
+  scenes: "",
+
+  currentSceneStart: 1,
+
+  currentSceneEnd: 5
+
+};
+
+
+/* =========================================================
+   ELEMENTS
+   ========================================================= */
+
+const topicInput =
+  document.getElementById("topic");
+
+const languageInput =
+  document.getElementById("language");
+
+const sceneCountInput =
+  document.getElementById("sceneCount");
+
+const statusBox =
+  document.getElementById("status");
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+function showStatus(message, loading = false) {
+
+  statusBox.classList.add("show");
+
+  statusBox.innerHTML =
+    loading
+      ? `<span class="loader"></span>${escapeHTML(message)}`
+      : escapeHTML(message);
 
 }
 
-async function generateStory(){
 
-const topic =
-document.getElementById("topic").value;
+function hideStatus() {
 
-const scenes =
-document.getElementById("scenes").value;
+  statusBox.classList.remove("show");
 
-const output =
-document.getElementById("output");
-
-const loader =
-document.getElementById("loader");
-
-const status =
-document.getElementById("status");
-
-if(!topic){
-alert("Enter a topic");
-return;
 }
 
-loader.style.display="block";
 
-status.innerHTML="";
+/* =========================================================
+   SAFE HTML
+   ========================================================= */
 
-output.innerHTML="";
+function escapeHTML(value) {
 
-const prompt = `
-Create a viral YouTube Shorts story.
+  return String(value)
 
-Topic: ${topic}
+    .replace(/&/g, "&amp;")
 
-Number of Scenes: ${scenes}
+    .replace(/</g, "&lt;")
 
-Generate:
+    .replace(/>/g, "&gt;")
 
-1. Powerful Hook
-2. Full Story
-3. Telugu Voiceover
-4. Scene Breakdown
-5. Scene Prompts
-6. Strong CTA
+    .replace(/"/g, "&quot;")
 
-Use engaging storytelling.
-`;
+    .replace(/'/g, "&#039;");
 
-try{
-
-const response = await fetch(
-"https://yt-shorts-api.nvrsarma.workers.dev/",
-{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-prompt:prompt
-})
 }
+
+
+/* =========================================================
+   DISPLAY OUTPUT
+   ========================================================= */
+
+function displayOutput(elementId, text) {
+
+  const element =
+    document.getElementById(elementId);
+
+  element.textContent = text;
+
+}
+
+
+/* =========================================================
+   SHOW CARD
+   ========================================================= */
+
+function showCard(id) {
+
+  document
+    .getElementById(id)
+    .classList.add("show");
+
+}
+
+
+/* =========================================================
+   WORKFLOW STEPS
+   ========================================================= */
+
+function activateStep(number) {
+
+  for (let i = 1; i <= 5; i++) {
+
+    const step =
+      document.getElementById("step" + i);
+
+    step.classList.remove("active");
+    step.classList.remove("done");
+
+    if (i < number) {
+      step.classList.add("done");
+    }
+
+    if (i === number) {
+      step.classList.add("active");
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   API REQUEST
+   ========================================================= */
+
+async function callAPI(payload) {
+
+  if (
+    !API_URL ||
+    API_URL === "YOUR_WORKER_URL_HERE"
+  ) {
+
+    throw new Error(
+      "Please add your Cloudflare Worker URL in API_URL."
+    );
+
+  }
+
+
+  const response = await fetch(
+    API_URL,
+    {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify(payload)
+
+    }
+  );
+
+
+  if (!response.ok) {
+
+    const errorText =
+      await response.text();
+
+    throw new Error(
+      `Server error ${response.status}: ${errorText}`
+    );
+
+  }
+
+
+  const data =
+    await response.json();
+
+
+  return data;
+
+}
+
+
+/* =========================================================
+   EXTRACT MODEL CONTENT
+   ========================================================= */
+
+function extractContent(data) {
+
+  /*
+    Supports several common worker response formats.
+  */
+
+  if (
+    data?.choices?.[0]?.message?.content
+  ) {
+
+    return data
+      .choices[0]
+      .message
+      .content;
+
+  }
+
+
+  if (
+    data?.result?.choices?.[0]?.message?.content
+  ) {
+
+    return data
+      .result
+      .choices[0]
+      .message
+      .content;
+
+  }
+
+
+  if (typeof data?.content === "string") {
+
+    return data.content;
+
+  }
+
+
+  if (typeof data?.text === "string") {
+
+    return data.text;
+
+  }
+
+
+  if (typeof data?.response === "string") {
+
+    return data.response;
+
+  }
+
+
+  /*
+    Some workers may already return structured data.
+  */
+
+  if (typeof data === "string") {
+
+    return data;
+
+  }
+
+
+  return JSON.stringify(
+    data,
+    null,
+    2
+  );
+
+}
+
+
+/* =========================================================
+   GENERATE STORY
+   ========================================================= */
+
+async function generateStory() {
+
+  const topic =
+    topicInput.value.trim();
+
+  if (!topic) {
+
+    alert(
+      "Please enter a story topic first."
+    );
+
+    topicInput.focus();
+
+    return;
+
+  }
+
+
+  state.topic =
+    topic;
+
+  state.language =
+    languageInput.value;
+
+  state.sceneCount =
+    Number(sceneCountInput.value);
+
+
+  showStatus(
+    "Creating your story...",
+    true
+  );
+
+
+  const button =
+    document.getElementById(
+      "generateStoryBtn"
+    );
+
+  button.disabled = true;
+
+
+  try {
+
+    const data =
+      await callAPI({
+
+        action: "story",
+
+        topic: state.topic,
+
+        language: state.language,
+
+        sceneCount: state.sceneCount
+
+      });
+
+
+    state.story =
+      extractContent(data);
+
+
+    displayOutput(
+      "storyOutput",
+      state.story
+    );
+
+
+    showCard(
+      "storyCard"
+    );
+
+
+    activateStep(2);
+
+
+    showStatus(
+      "Story generated successfully."
+    );
+
+
+    document
+      .getElementById("storyCard")
+      .scrollIntoView({
+        behavior: "smooth"
+      });
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    showStatus(
+      error.message
+    );
+
+  }
+
+  finally {
+
+    button.disabled = false;
+
+  }
+
+}
+
+
+/* =========================================================
+   REGENERATE STORY
+   ========================================================= */
+
+function regenerateStory() {
+
+  state.story = "";
+
+  generateStory();
+
+}
+
+
+/* =========================================================
+   APPROVE STORY
+   ========================================================= */
+
+async function approveStory() {
+
+  if (!state.story) {
+
+    alert(
+      "Please generate a story first."
+    );
+
+    return;
+
+  }
+
+
+  showStatus(
+    "Creating character sheets...",
+    true
+  );
+
+
+  try {
+
+    const data =
+      await callAPI({
+
+        action: "characters",
+
+        topic: state.topic,
+
+        language: state.language,
+
+        sceneCount: state.sceneCount,
+
+        story: state.story
+
+      });
+
+
+    state.characters =
+      extractContent(data);
+
+
+    displayOutput(
+      "characterOutput",
+      state.characters
+    );
+
+
+    showCard(
+      "characterCard"
+    );
+
+
+    activateStep(3);
+
+
+    showStatus(
+      "Character sheets generated."
+    );
+
+
+    document
+      .getElementById("characterCard")
+      .scrollIntoView({
+        behavior: "smooth"
+      });
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    showStatus(
+      error.message
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   GENERATE FIRST 5 SCENES
+   ========================================================= */
+
+async function generateScenes() {
+
+  state.currentSceneStart =
+    1;
+
+  state.currentSceneEnd =
+    Math.min(
+      5,
+      state.sceneCount
+    );
+
+
+  await generateSceneBatch();
+
+}
+
+
+/* =========================================================
+   GENERATE NEXT SCENES
+   ========================================================= */
+
+async function nextScenes() {
+
+  const nextStart =
+    state.currentSceneEnd + 1;
+
+
+  if (
+    nextStart >
+    state.sceneCount
+  ) {
+
+    finishProduction();
+
+    return;
+
+  }
+
+
+  state.currentSceneStart =
+    nextStart;
+
+  state.currentSceneEnd =
+    Math.min(
+      nextStart + 4,
+      state.sceneCount
+    );
+
+
+  await generateSceneBatch();
+
+}
+
+
+/* =========================================================
+   SCENE BATCH
+   ========================================================= */
+
+async function generateSceneBatch() {
+
+  showStatus(
+    `Generating Scenes ${state.currentSceneStart}–${state.currentSceneEnd}...`,
+    true
+  );
+
+
+  try {
+
+    const data =
+      await callAPI({
+
+        action: "scenes",
+
+        topic: state.topic,
+
+        language: state.language,
+
+        sceneCount: state.sceneCount,
+
+        story: state.story,
+
+        characters: state.characters,
+
+        startScene:
+          state.currentSceneStart,
+
+        endScene:
+          state.currentSceneEnd
+
+      });
+
+
+    state.scenes =
+      extractContent(data);
+
+
+    displayOutput(
+      "sceneOutput",
+      state.scenes
+    );
+
+
+    document
+      .getElementById("sceneSubtitle")
+      .textContent =
+      `Scenes ${state.currentSceneStart}–${state.currentSceneEnd}`;
+
+
+    document
+      .getElementById("sceneCounter")
+      .textContent =
+      `Scenes ${state.currentSceneStart}–${state.currentSceneEnd}`;
+
+
+    showCard(
+      "sceneCard"
+    );
+
+
+    activateStep(4);
+
+
+    const nextStart =
+      state.currentSceneEnd + 1;
+
+
+    const nextButton =
+      document.getElementById(
+        "nextBtn"
+      );
+
+
+    if (
+      nextStart >
+      state.sceneCount
+    ) {
+
+      nextButton.textContent =
+        "🏁 Finish";
+
+    }
+
+    else {
+
+      nextButton.textContent =
+        "➡️ NEXT";
+
+    }
+
+
+    showStatus(
+      `Scenes ${state.currentSceneStart}–${state.currentSceneEnd} generated.`
+    );
+
+
+    document
+      .getElementById("sceneCard")
+      .scrollIntoView({
+        behavior: "smooth"
+      });
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    showStatus(
+      error.message
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   FINISH
+   ========================================================= */
+
+function finishProduction() {
+
+  activateStep(5);
+
+  showStatus(
+    "🎉 Your Shorts production package is complete."
+  );
+
+  alert(
+    "Your story, character sheets and scene prompts are ready!"
+  );
+
+}
+
+
+/* =========================================================
+   COPY
+   ========================================================= */
+
+async function copyOutput(elementId) {
+
+  const element =
+    document.getElementById(
+      elementId
+    );
+
+
+  const text =
+    element.textContent;
+
+
+  try {
+
+    await navigator.clipboard.writeText(
+      text
+    );
+
+
+    showStatus(
+      "Copied to clipboard ✓"
+    );
+
+  }
+
+  catch {
+
+    alert(
+      "Copy failed. Please select the text manually."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CLEAR
+   ========================================================= */
+
+function clearEverything() {
+
+  state = {
+
+    topic: "",
+
+    language: "Telugu",
+
+    sceneCount: 10,
+
+    story: "",
+
+    characters: "",
+
+    scenes: "",
+
+    currentSceneStart: 1,
+
+    currentSceneEnd: 5
+
+  };
+
+
+  topicInput.value = "";
+
+  document
+    .getElementById("storyOutput")
+    .textContent = "";
+
+  document
+    .getElementById("characterOutput")
+    .textContent = "";
+
+  document
+    .getElementById("sceneOutput")
+    .textContent = "";
+
+
+  document
+    .getElementById("storyCard")
+    .classList.remove("show");
+
+  document
+    .getElementById("characterCard")
+    .classList.remove("show");
+
+  document
+    .getElementById("sceneCard")
+    .classList.remove("show");
+
+
+  activateStep(1);
+
+  hideStatus();
+
+}
+
+
+/* =========================================================
+   ENTER KEY
+   ========================================================= */
+
+topicInput.addEventListener(
+  "keydown",
+  function(event) {
+
+    if (
+      event.ctrlKey &&
+      event.key === "Enter"
+    ) {
+
+      generateStory();
+
+    }
+
+  }
 );
-
-const data = await response.json();
-
-loader.style.display="none";
-
-if(
-data.choices &&
-data.choices.length > 0
-){
-
-const story =
-data.choices[0].message.content;
-
-output.innerHTML =
-formatContent(story);
-
-status.innerHTML =
-"✅ Story Generated Successfully";
-
-}else{
-
-output.innerHTML =
-"<pre>" +
-JSON.stringify(data,null,2) +
-"</pre>";
-
-status.innerHTML =
-"⚠ API Response Received";
-
-}
-
-}catch(error){
-
-loader.style.display="none";
-
-status.innerHTML =
-"❌ Error";
-
-output.innerHTML =
-error.message;
-
-}
-
-}
-
-function copyStory(){
-
-const text =
-document.getElementById("output").innerText;
-
-navigator.clipboard.writeText(text);
-
-alert("Story Copied");
-}
-
-function downloadStory(){
-
-const text =
-document.getElementById("output").innerText;
-
-const blob =
-new Blob([text],{
-type:"text/plain"
-});
-
-const a =
-document.createElement("a");
-
-a.href =
-URL.createObjectURL(blob);
-
-a.download =
-"youtube-short-story.txt";
-
-a.click();
-
-}
 
 </script>
 
