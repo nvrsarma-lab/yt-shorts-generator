@@ -8,37 +8,33 @@
 
 <style>
 body{
-    font-family: Arial, sans-serif;
-    max-width: 900px;
-    margin: auto;
-    padding: 20px;
-    background: #f4f4f4;
+font-family:Arial,sans-serif;
+max-width:900px;
+margin:auto;
+padding:20px;
+background:#f4f4f4;
 }
-
 h1{
-    text-align:center;
+text-align:center;
 }
-
 input{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    box-sizing:border-box;
+width:100%;
+padding:12px;
+margin-top:10px;
+box-sizing:border-box;
 }
-
 button{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    font-size:16px;
-    cursor:pointer;
+width:100%;
+padding:12px;
+margin-top:10px;
+font-size:16px;
+cursor:pointer;
 }
-
 textarea{
-    width:100%;
-    height:400px;
-    margin-top:10px;
-    box-sizing:border-box;
+width:100%;
+height:450px;
+margin-top:10px;
+box-sizing:border-box;
 }
 </style>
 </head>
@@ -60,33 +56,24 @@ placeholder="Number of Scenes">
 Generate Story
 </button>
 
-<textarea
-id="output"
-placeholder="Generated story will appear here...">
-</textarea>
+<textarea id="output"></textarea>
 
 <script>
 
 async function generateStory(){
 
-    const topic =
-    document.getElementById("topic").value;
+const topic =
+document.getElementById("topic").value;
 
-    const scenes =
-    document.getElementById("scenes").value;
+const scenes =
+document.getElementById("scenes").value;
 
-    const output =
-    document.getElementById("output");
+const output =
+document.getElementById("output");
 
-    if(!topic){
-        output.value =
-        "Please enter a story topic.";
-        return;
-    }
+output.value = "Generating...";
 
-    output.value = "Generating...";
-
-    const prompt = `
+const prompt = `
 Create a viral YouTube Shorts story.
 
 Topic: ${topic}
@@ -102,38 +89,44 @@ Generate:
 5. Strong CTA
 `;
 
-    try{
+try{
 
-        const response = await fetch(
-        "https://yt-shorts-api.nvrsarma.workers.dev/",
-        {
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                prompt: prompt
-            })
-        });
+const response = await fetch(
+"https://yt-shorts-api.nvrsarma.workers.dev/",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+prompt: prompt
+})
+}
+);
 
-        const data = await response.json();
+const data = await response.json();
 
-        if(data.candidates){
-            output.value =
-            data.candidates[0].content.parts[0].text;
-        }else{
-            output.value =
-            JSON.stringify(data,null,2);
-        }
+if(data.choices){
 
-    }catch(error){
+output.value =
+data.choices[0].message.content;
 
-        output.value =
-        "Error: " + error.message;
+}else{
 
-    }
+output.value =
+JSON.stringify(data,null,2);
 
 }
+
+}catch(error){
+
+output.value =
+"Error: " + error.message;
+
+}
+
+}
+
 </script>
 
 </body>
