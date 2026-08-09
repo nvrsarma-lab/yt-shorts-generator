@@ -1,13 +1,13 @@
 export default {
   async fetch(request, env, ctx) {
-    // 1. Setup CORS Headers
+    // 1. Setup CORS Headers to allow requests from GitHub Pages or local frontend
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
     };
 
-    // Handle Preflight CORS Request
+    // Handle Preflight OPTIONS request
     if (request.method === "OPTIONS") {
       return new Response(null, { headers: corsHeaders });
     }
@@ -15,7 +15,7 @@ export default {
     // 2. Health check route
     if (request.method === "GET") {
       return new Response(
-        JSON.stringify({ status: "ok", message: "YouTube Shorts API is running" }),
+        JSON.stringify({ status: "ok", message: "YouTube Shorts API is active" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -40,9 +40,9 @@ export default {
           );
         }
 
-        const systemPrompt = `You are an expert YouTube Shorts creator and viral content strategist.
+        const systemPrompt = `You are an expert YouTube Shorts content creator.
 Generate structured JSON output for a 30-60 second YouTube Short.
-Do not include any intro text, markdown codeblocks (like \`\`\`json), or conversational fluff. Return ONLY valid raw JSON matching this structure:
+Do NOT include intro text, markdown explanation, or fluff. Return ONLY valid JSON matching this exact structure:
 
 {
   "title": ["Title 1", "Title 2", "Title 3"],
@@ -50,7 +50,7 @@ Do not include any intro text, markdown codeblocks (like \`\`\`json), or convers
   "script": [
     {
       "timeframe": "0:00 - 0:05",
-      "voiceover": "Line spoken by voiceover",
+      "voiceover": "Line spoken by narrator",
       "visual_prompt": "Detailed AI image/video prompt",
       "text_on_screen": "Short bold overlay text"
     }
@@ -62,20 +62,20 @@ Do not include any intro text, markdown codeblocks (like \`\`\`json), or convers
 
         const userPrompt = `Create a YouTube Short concept about: "${topic}". Tone: ${tone}. Language: ${language}.`;
 
-        // 4. List of current free models on OpenRouter
+        // Array of popular free models on OpenRouter to try sequentially
         const freeModels = [
           "inclusionai/ling-3.0-tiny:free",
           "poolside/laguna-xs-2.1:free",
           "cohere/north-mini-code:free",
-          "openai/gpt-oss-20b:free",
-          "google/gemma-4-31b:free",
-          "nvidia/nemotron-nano-9b-v2:free"
+          "meta-llama/llama-3.1-8b-instruct:free",
+          "google/gemma-2-9b-it:free",
+          "mistralai/mistral-7b-instruct:free"
         ];
 
         let openRouterResponse = null;
         let lastError = null;
 
-        // Loop through the free models list until one works
+        // Iterate through free models until one returns a success response
         for (const model of freeModels) {
           try {
             openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -92,13 +92,12 @@ Do not include any intro text, markdown codeblocks (like \`\`\`json), or convers
                   { role: "system", content: systemPrompt },
                   { role: "user", content: userPrompt },
                 ],
-                temperature: 0.7,
-                response_format: { type: "json_object" }
+                temperature: 0.7
               }),
             });
 
             if (openRouterResponse.ok) {
-              break; // Successfully got a response from OpenRouter
+              break; // Success! Exit loop
             } else {
               lastError = await openRouterResponse.text();
             }
@@ -115,11 +114,17 @@ Do not include any intro text, markdown codeblocks (like \`\`\`json), or convers
         }
 
         const data = await openRouterResponse.json();
-        const content = data.choices?.[0]?.message?.content;
+        const content = data.choices?.[0]?.message?.content || "";
 
+        // Safe JSON extraction logic (handles backticks ```json ... ``` wrapper)
         let parsedResult;
         try {
-          parsedResult = JSON.parse(content);
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            parsedResult = JSON.parse(jsonMatch[0]);
+          } else {
+            parsedResult = JSON.parse(content);
+          }
         } catch (e) {
           parsedResult = { raw_output: content };
         }
