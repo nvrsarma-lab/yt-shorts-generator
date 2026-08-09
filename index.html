@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>YouTube Shorts Generator</title>
+<style>
+body{
+font-family:Arial;
+max-width:800px;
+margin:auto;
+padding:20px;
+}
+textarea{
+width:100%;
+height:120px;
+}
+button{
+padding:10px 20px;
+margin-top:10px;
+}
+</style>
+</head>
+<body>
+
+<h1>YouTube Shorts Generator</h1>
+
+<input id="topic" placeholder="Story Topic" style="width:100%;padding:10px">
+
+<br><br>
+
+<input id="scenes" type="number" placeholder="Number of Scenes">
+
+<br><br>
+
+<button onclick="generate()">Generate</button>
+
+<h3>Result</h3>
+
+<textarea id="result"></textarea>
+
+<script>
+
+const API_KEY="YOUR_GEMINI_API_KEY";
+
+async function generate(){
+
+let topic=document.getElementById("topic").value;
+let scenes=document.getElementById("scenes").value;
+
+let prompt=
+`Create a viral YouTube Shorts story about ${topic}.
+Number of scenes: ${scenes}
+
+Generate:
+1.Full Story
+2.Telugu Voiceover
+3.Scene Prompts
+4.Character Prompts`;
+
+let response=await fetch(
+`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+contents:[
+{
+parts:[
+{
+text:prompt
+}
+]
+}
+]
+})
+}
+);
+
+let data=await response.json();
+
+document.getElementById("result").value=
+data.candidates[0].content.parts[0].text;
+}
+
+</script>
+
+</body>
+</html>
