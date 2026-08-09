@@ -1,65 +1,145 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Free YouTube Shorts Generator</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 650px; margin: 40px auto; padding: 0 20px; line-height: 1.6; }
-    input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
-    button { background: #ff0000; color: white; font-weight: bold; border: none; cursor: pointer; }
-    button:hover { background: #cc0000; }
-    pre { background: #f4f4f4; padding: 15px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap; }
-  </style>
-</head>
-<body>
-  <h2>🎬 AI YouTube Shorts Generator</h2>
-  
-  <label for="topic">Topic / Idea:</label>
-  <input type="text" id="topic" placeholder="e.g., 3 Crazy Facts About Space">
+export default {
+  async fetch(request, env, ctx) {
+    // 1. Setup CORS Headers
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    };
 
-  <label for="tone">Tone:</label>
-  <select id="tone">
-    <option value="exciting">Exciting / Energetic</option>
-    <option value="dramatic">Dramatic / Mysterious</option>
-    <option value="educational">Educational / Informative</option>
-    <option value="funny">Humorous / Funny</option>
-  </select>
+    // Handle Preflight CORS Request
+    if (request.method === "OPTIONS") {
+      return new Response(null, { headers: corsHeaders });
+    }
 
-  <button onclick="generateScript()" id="btn">Generate Script</button>
+    // 2. Health check route
+    if (request.method === "GET") {
+      return new Response(
+        JSON.stringify({ status: "ok", message: "YouTube Shorts API is running" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
-  <h3>Output:</h3>
-  <pre id="output">Your generated YouTube Short script will appear here...</pre>
-
-  <script>
-    async function generateScript() {
-      const topic = document.getElementById("topic").value;
-      const tone = document.getElementById("tone").value;
-      const output = document.getElementById("output");
-      const btn = document.getElementById("btn");
-
-      if (!topic) return alert("Please enter a topic!");
-
-      btn.disabled = true;
-      btn.innerText = "Generating Script...";
-      output.innerText = "Connecting to Cloudflare Worker & OpenRouter...";
-
+    // 3. Process POST requests
+    if (request.method === "POST") {
       try {
-        const response = await fetch("https://yt-shorts-api.nvrsarma.workers.dev/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ topic, tone })
+        const body = await request.json();
+        const { topic, tone = "engaging", language = "English" } = body;
+
+        if (!topic) {
+          return new Response(
+            JSON.stringify({ error: "Missing required parameter: 'topic'" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        if (!env.OPENROUTER_API_KEY) {
+          return new Response(
+            JSON.stringify({ error: "OPENROUTER_API_KEY secret is missing in Cloudflare settings." }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const systemPrompt = `You are an expert YouTube Shorts creator and viral content strategist.
+Generate structured JSON output for a 30-60 second YouTube Short.
+Do not include any intro text, markdown codeblocks (like \`\`\`json), or conversational fluff. Return ONLY valid raw JSON matching this structure:
+
+{
+  "title": ["Title 1", "Title 2", "Title 3"],
+  "hook": "Opening attention-grabbing line",
+  "script": [
+    {
+      "timeframe": "0:00 - 0:05",
+      "voiceover": "Line spoken by voiceover",
+      "visual_prompt": "Detailed AI image/video prompt",
+      "text_on_screen": "Short bold overlay text"
+    }
+  ],
+  "call_to_action": "Closing line asking viewers to subscribe/comment",
+  "description": "Video description with hashtags",
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"]
+}`;
+
+        const userPrompt = `Create a YouTube Short concept about: "${topic}". Tone: ${tone}. Language: ${language}.`;
+
+        // 4. List of current free models on OpenRouter
+        const freeModels = [
+          "inclusionai/ling-3.0-tiny:free",
+          "poolside/laguna-xs-2.1:free",
+          "cohere/north-mini-code:free",
+          "openai/gpt-oss-20b:free",
+          "google/gemma-4-31b:free",
+          "nvidia/nemotron-nano-9b-v2:free"
+        ];
+
+        let openRouterResponse = null;
+        let lastError = null;
+
+        // Loop through the free models list until one works
+        for (const model of freeModels) {
+          try {
+            openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${env.OPENROUTER_API_KEY.trim()}`,
+                "HTTP-Referer": "https://yt-shorts-api.nvrsarma.workers.dev",
+                "X-Title": "YouTube Shorts Generator",
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model: model,
+                messages: [
+                  { role: "system", content: systemPrompt },
+                  { role: "user", content: userPrompt },
+                ],
+                temperature: 0.7,
+                response_format: { type: "json_object" }
+              }),
+            });
+
+            if (openRouterResponse.ok) {
+              break; // Successfully got a response from OpenRouter
+            } else {
+              lastError = await openRouterResponse.text();
+            }
+          } catch (e) {
+            lastError = e.message;
+          }
+        }
+
+        if (!openRouterResponse || !openRouterResponse.ok) {
+          return new Response(
+            JSON.stringify({ error: "All free models failed on OpenRouter", details: lastError }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const data = await openRouterResponse.json();
+        const content = data.choices?.[0]?.message?.content;
+
+        let parsedResult;
+        try {
+          parsedResult = JSON.parse(content);
+        } catch (e) {
+          parsedResult = { raw_output: content };
+        }
+
+        return new Response(JSON.stringify(parsedResult), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
 
-        const data = await response.json();
-        output.innerText = JSON.stringify(data, null, 2);
       } catch (err) {
-        output.innerText = "Error generating script: " + err.message;
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "Generate Script";
+        return new Response(
+          JSON.stringify({ error: "Internal Server Error", message: err.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
     }
-  </script>
-</body>
-</html>
+
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  },
+};
