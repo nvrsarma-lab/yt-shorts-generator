@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>YouTube Studio AI - Multi-Genre Script & Nano Banana Asset Generator</title>
+  <title>YouTube Studio AI - Multi-Genre Script & Nano Banana Image Generator</title>
   <style>
     :root {
       --primary: #ff0000;
@@ -21,7 +21,7 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background-color: var(--bg);
       color: var(--text);
-      max-width: 950px;
+      max-width: 980px;
       margin: 0 auto;
       padding: 30px 20px;
       line-height: 1.5;
@@ -128,7 +128,9 @@
     .master-prompt-box { background: #111; border: 1px solid var(--banana); padding: 18px; border-radius: 8px; margin-bottom: 24px; position: relative; }
     .master-prompt-box code { color: #fde047; font-size: 14px; word-break: break-all; white-space: pre-wrap; display: block; background: #000; padding: 12px; border-radius: 6px; margin-top: 10px; border: 1px solid #222; }
 
-    .copy-btn {
+    .action-btn-group { display: flex; gap: 8px; float: right; }
+    
+    .action-btn {
       background-color: #222;
       color: #fff;
       border: 1px solid var(--border);
@@ -136,9 +138,15 @@
       border-radius: 6px;
       cursor: pointer;
       font-size: 12px;
-      float: right;
+      font-weight: 600;
     }
-    .copy-btn:hover { background-color: var(--primary); }
+    .action-btn:hover { background-color: var(--primary); }
+    .action-btn.banana-btn { background-color: var(--banana); color: #000; }
+    .action-btn.banana-btn:hover { background-color: #ca8a04; color: #fff; }
+
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 15px; }
+    .gallery-item { background: #161616; border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+    .gallery-item img { width: 100%; height: 260px; object-fit: cover; border-radius: 6px; border: 1px solid #333; margin-top: 8px; }
 
     .loading-spinner { text-align: center; padding: 40px; color: var(--text-muted); display: none; }
     .translator-box { background: #161616; border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-top: 15px; }
@@ -147,7 +155,7 @@
 <body>
 
   <h1>🎬 YouTube Studio AI</h1>
-  <p class="subtitle">Generate multi-lingual scripts, documentaries, voiceovers, Nano Banana AI character sheets & scene breakdowns</p>
+  <p class="subtitle">Generate scripts, voiceovers, Nano Banana AI character sheets, prompts & live image renders</p>
 
   <div class="input-card">
     
@@ -255,8 +263,9 @@
     <div class="tabs-header">
       <button class="tab-btn active" onclick="switchTab('tab-story', event)">📖 Full Story</button>
       <button class="tab-btn" onclick="switchTab('tab-lang', event)">🎙️ Voiceover Script</button>
-      <button class="tab-btn" onclick="switchTab('tab-scenes', event)">🎬 Scene Breakdown (8-10s Each)</button>
+      <button class="tab-btn" onclick="switchTab('tab-scenes', event)">🎬 Scene Breakdown</button>
       <button class="tab-btn" onclick="switchTab('tab-chars', event)">👤 Character Sheets (Nano Banana)</button>
+      <button class="tab-btn" onclick="switchTab('tab-gallery', event)">🎨 Rendered Images Gallery</button>
       <button class="tab-btn" onclick="switchTab('tab-hook', event)">🪝 Hook & CTA</button>
       <button class="tab-btn" onclick="switchTab('tab-translator', event)">🔄 Telugu Translator</button>
     </div>
@@ -265,6 +274,16 @@
     <div id="tab-lang" class="tab-content"></div>
     <div id="tab-scenes" class="tab-content"></div>
     <div id="tab-chars" class="tab-content"></div>
+    
+    <!-- Rendered Gallery Tab -->
+    <div id="tab-gallery" class="tab-content">
+      <h3>🎨 Live Nano Banana Render Gallery</h3>
+      <p>Generated AI images using Nano Banana will appear below:</p>
+      <div class="gallery-grid" id="galleryGrid">
+        <p style="color:#aaa;">No image generations requested yet. Use the 🍌 <strong>Generate Image</strong> buttons on Character Sheets or Scenes!</p>
+      </div>
+    </div>
+
     <div id="tab-hook" class="tab-content"></div>
     
     <!-- Standalone Translator Tab -->
@@ -389,7 +408,7 @@
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-      evt.currentTarget.classList.add('active');
+      if(evt) evt.currentTarget.classList.add('active');
       document.getElementById(tabId).classList.add('active');
     }
 
@@ -400,6 +419,51 @@
         btnObj.innerText = "Copied! ✓";
         setTimeout(() => btnObj.innerText = origText, 2000);
       });
+    }
+
+    async function generateImageViaNanoBanana(promptText, labelTitle) {
+      const galleryGrid = document.getElementById("galleryGrid");
+      
+      // Create pending item card
+      const itemCard = document.createElement("div");
+      itemCard.className = "gallery-item";
+      itemCard.innerHTML = `
+        <strong>${labelTitle}</strong>
+        <p style="font-size:12px; color:#aaa;">Generating with Nano Banana AI...</p>
+        <div style="padding:40px; color:#eab308;">⏳ Rendering image...</div>
+      `;
+      
+      // Clear empty placeholder text if present
+      if (galleryGrid.innerHTML.includes("No image generations")) {
+        galleryGrid.innerHTML = "";
+      }
+      galleryGrid.prepend(itemCard);
+
+      // Automatically switch to gallery tab
+      switchTab('tab-gallery');
+
+      try {
+        const response = await fetch("https://yt-shorts-api.nvrsarma.workers.dev/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "generate_image", prompt: promptText })
+        });
+
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+
+        const imgUrl = data.image_url || data.b64_image;
+        itemCard.innerHTML = `
+          <strong>${labelTitle}</strong>
+          <img src="${imgUrl}" alt="${labelTitle}" />
+          <button class="action-btn" style="margin-top:8px;" onclick="window.open('${imgUrl}', '_blank')">View Full Screen 🔍</button>
+        `;
+      } catch (err) {
+        itemCard.innerHTML = `
+          <strong>${labelTitle}</strong>
+          <p style="color:#ff4444; font-size:13px; margin-top:10px;">❌ Rendering Error: ${err.message}</p>
+        `;
+      }
     }
 
     async function generateShort() {
@@ -496,9 +560,12 @@
         scenes.forEach((scene, index) => {
           html += `
             <div class="scene-box">
+              <div class="action-btn-group">
+                <button class="action-btn banana-btn" onclick="generateImageViaNanoBanana('${scene.visual_prompt.replace(/'/g, "\\'")}', 'Scene ${index + 1}')">Generate Image (Nano Banana) 🍌</button>
+              </div>
               <div class="scene-title">Scene ${index + 1} (${scene.timeframe || '8-10 sec'})</div>
               <p><strong>Voiceover:</strong> ${scene.voiceover}</p>
-              <p><strong>Visual Prompt:</strong> <em>${scene.visual_prompt}</em></p>
+              <p><strong>Visual Prompt:</strong> <em id="scenePrompt_${index}">${scene.visual_prompt}</em></p>
               <p><span class="badge">Text on Screen</span> ${scene.text_on_screen}</p>
             </div>
           `;
@@ -515,9 +582,12 @@
       if (masterPrompt) {
         html += `
           <div class="master-prompt-box">
-            <button class="copy-btn" onclick="copyToClipboard('masterPromptText', this)">Copy Prompt 📋</button>
+            <div class="action-btn-group">
+              <button class="action-btn" onclick="copyToClipboard('masterPromptText', this)">Copy Prompt 📋</button>
+              <button class="action-btn banana-btn" onclick="generateImageViaNanoBanana('${masterPrompt.replace(/'/g, "\\'")}', 'Master Character Sheet')">Generate Image (Nano Banana) 🍌</button>
+            </div>
             <h4 style="color:var(--banana); margin-top:0;">🍌 ${engineName} Character Sheet Master Prompt</h4>
-            <p style="font-size:13px; color:#aaa; margin-bottom:8px;">Copy and paste this master prompt directly into ${engineName} to generate consistent multi-angle turnaround reference sheets:</p>
+            <p style="font-size:13px; color:#aaa; margin-bottom:8px;">Copy or generate turnaround reference sheets directly using Nano Banana:</p>
             <code id="masterPromptText">${masterPrompt}</code>
           </div>
         `;
@@ -527,12 +597,15 @@
         chars.forEach((c, i) => {
           html += `
             <div class="char-card">
-              <button class="copy-btn" onclick="copyToClipboard('charPromptText_${i}', this)">Copy Prompt 📋</button>
+              <div class="action-btn-group">
+                <button class="action-btn" onclick="copyToClipboard('charPromptText_${i}', this)">Copy Prompt 📋</button>
+                <button class="action-btn banana-btn" onclick="generateImageViaNanoBanana('${(c.individual_image_prompt || c.appearance).replace(/'/g, "\\'")}', '${c.name}')">Generate Image (Nano Banana) 🍌</button>
+              </div>
               <h4 style="margin-top:0;">${c.name} ${c.role ? '(' + c.role + ')' : ''}</h4>
               <p><strong>Visual Description:</strong> ${c.appearance || 'N/A'}</p>
               <p><strong>Personality Traits:</strong> ${c.personality || 'N/A'}</p>
               ${c.individual_image_prompt ? `
-                <p><strong>Individual Nano Banana Prompt:</strong></p>
+                <p><strong>Individual Prompt:</strong></p>
                 <code id="charPromptText_${i}" style="background:#000; color:#38bdf8; padding:8px; border-radius:4px; display:block; margin-top:4px;">${c.individual_image_prompt}</code>
               ` : ''}
             </div>
