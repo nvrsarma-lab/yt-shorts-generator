@@ -51,7 +51,7 @@
 <body>
 
   <h2>🎬 YouTube Shorts AI Generator</h2>
-  <p>Generate viral scripts, hooks, and scene ideas using your Cloudflare Worker backend.</p>
+  <p>Generate viral scripts, hooks, and visual ideas using your Cloudflare Worker backend.</p>
 
   <div class="form-group">
     <label for="topic">Topic / Video Idea:</label>
@@ -90,7 +90,6 @@
       output.innerText = "Contacting Worker & OpenRouter AI...";
 
       try {
-        // Pointing to your deployed Cloudflare Worker API
         const response = await fetch("https://yt-shorts-api.nvrsarma.workers.dev/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
