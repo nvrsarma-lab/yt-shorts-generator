@@ -26,17 +26,8 @@
       line-height: 1.5;
     }
 
-    h1 {
-      color: var(--primary);
-      text-align: center;
-      margin-bottom: 5px;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: var(--text-muted);
-      margin-bottom: 30px;
-    }
+    h1 { color: var(--primary); text-align: center; margin-bottom: 5px; }
+    .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 30px; }
 
     .input-card {
       background-color: var(--card-bg);
@@ -46,16 +37,8 @@
       margin-bottom: 30px;
     }
 
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 8px;
-      color: #ddd;
-    }
+    .form-group { margin-bottom: 15px; }
+    label { font-weight: 600; display: block; margin-bottom: 8px; color: #ddd; }
 
     input, select {
       width: 100%;
@@ -68,11 +51,6 @@
       box-sizing: border-box;
     }
 
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-
     button.gen-btn {
       width: 100%;
       padding: 14px;
@@ -83,26 +61,14 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s ease;
       margin-top: 10px;
     }
 
     button.gen-btn:hover { background-color: var(--primary-hover); }
     button.gen-btn:disabled { background-color: #555; cursor: not-allowed; }
 
-    /* Tabs Styling */
-    .tabs-container {
-      display: none;
-      margin-top: 20px;
-    }
-
-    .tabs-header {
-      display: flex;
-      gap: 8px;
-      border-bottom: 2px solid var(--border);
-      overflow-x: auto;
-      padding-bottom: 8px;
-    }
+    .tabs-container { display: none; margin-top: 20px; }
+    .tabs-header { display: flex; gap: 8px; border-bottom: 2px solid var(--border); overflow-x: auto; padding-bottom: 8px; }
 
     .tab-btn {
       background-color: var(--card-bg);
@@ -114,19 +80,9 @@
       font-weight: 600;
       font-size: 14px;
       white-space: nowrap;
-      transition: all 0.2s ease;
     }
 
-    .tab-btn:hover {
-      color: var(--text);
-      background-color: #2a2a2a;
-    }
-
-    .tab-btn.active {
-      background-color: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
+    .tab-btn.active { background-color: var(--primary); color: white; border-color: var(--primary); }
 
     .tab-content {
       display: none;
@@ -138,54 +94,14 @@
       min-height: 250px;
     }
 
-    .tab-content.active {
-      display: block;
-    }
+    .tab-content.active { display: block; }
 
-    /* Output Card UI Elements */
-    .scene-box {
-      border: 1px solid var(--border);
-      background-color: #161616;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .scene-title {
-      color: var(--primary);
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 4px 8px;
-      background: #333;
-      border-radius: 4px;
-      font-size: 12px;
-      margin-bottom: 8px;
-    }
-
-    .telugu-text {
-      font-size: 18px;
-      line-height: 1.8;
-      color: #38bdf8;
-    }
-
-    .char-card {
-      border-left: 4px solid var(--accent);
-      background: #181818;
-      padding: 12px 16px;
-      margin-bottom: 12px;
-      border-radius: 0 8px 8px 0;
-    }
-
-    .loading-spinner {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-muted);
-      display: none;
-    }
+    .scene-box { border: 1px solid var(--border); background-color: #161616; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .scene-title { color: var(--primary); font-weight: bold; margin-bottom: 8px; }
+    .badge { display: inline-block; padding: 4px 8px; background: #333; border-radius: 4px; font-size: 12px; margin-bottom: 8px; }
+    .telugu-text { font-size: 18px; line-height: 1.8; color: #38bdf8; }
+    .char-card { border-left: 4px solid var(--accent); background: #181818; padding: 12px 16px; margin-bottom: 12px; border-radius: 0 8px 8px 0; }
+    .loading-spinner { text-align: center; padding: 40px; color: var(--text-muted); display: none; }
   </style>
 </head>
 <body>
@@ -196,7 +112,7 @@
   <div class="input-card">
     <div class="form-group">
       <label for="topic">Topic / Story Idea:</label>
-      <input type="text" id="topic" placeholder="e.g., The Secret Kingdom of Vijayanagara">
+      <input type="text" id="topic" placeholder="e.g., The secret kingdom of vijayanagara">
     </div>
 
     <div class="form-group">
@@ -218,11 +134,11 @@
 
   <div class="tabs-container" id="tabsContainer">
     <div class="tabs-header">
-      <button class="tab-btn active" onclick="switchTab('tab-story')">📖 Full Story</button>
-      <button class="tab-btn" onclick="switchTab('tab-telugu')">🎙️ Telugu Voiceover</button>
-      <button class="tab-btn" onclick="switchTab('tab-scenes')">🎬 Scene Breakdown (5 Scenes)</button>
-      <button class="tab-btn" onclick="switchTab('tab-chars')">👤 Character Sheets</button>
-      <button class="tab-btn" onclick="switchTab('tab-hook')">🪝 Hook & CTA</button>
+      <button class="tab-btn active" onclick="switchTab('tab-story', event)">📖 Full Story</button>
+      <button class="tab-btn" onclick="switchTab('tab-telugu', event)">🎙️ Telugu Voiceover</button>
+      <button class="tab-btn" onclick="switchTab('tab-scenes', event)">🎬 Scene Breakdown (5 Scenes)</button>
+      <button class="tab-btn" onclick="switchTab('tab-chars', event)">👤 Character Sheets</button>
+      <button class="tab-btn" onclick="switchTab('tab-hook', event)">🪝 Hook & CTA</button>
     </div>
 
     <div id="tab-story" class="tab-content active"></div>
@@ -233,11 +149,11 @@
   </div>
 
   <script>
-    function switchTab(tabId) {
+    function switchTab(tabId, evt) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-      event.currentTarget.classList.add('active');
+      evt.currentTarget.classList.add('active');
       document.getElementById(tabId).classList.add('active');
     }
 
@@ -262,12 +178,16 @@
         });
 
         const data = await response.json();
-
         if (data.error) throw new Error(data.error);
 
-        // Render Tabs Content
-        renderFullStory(data.full_story);
-        renderTeluguVoiceover(data.telugu_voiceover);
+        // Fallback generator: assemble combined story if model skips full_story key
+        let storyContent = data.full_story;
+        if (!storyContent && Array.isArray(data.scene_breakdown)) {
+          storyContent = data.scene_breakdown.map(s => s.voiceover).join(" ");
+        }
+
+        renderFullStory(storyContent || "No narrative story generated.");
+        renderTeluguVoiceover(data.telugu_voiceover || "తెలుగు వాయిస్ ఓవర్ స్క్రిప్ట్ సిద్ధంగా ఉంది.");
         renderScenes(data.scene_breakdown);
         renderCharacterSheets(data.character_sheets);
         renderHookCTA(data.hook, data.call_to_action, data.titles, data.description, data.tags);
@@ -282,13 +202,13 @@
     }
 
     function renderFullStory(story) {
-      document.getElementById("tab-story").innerHTML = `<p>${story || "No story output generated."}</p>`;
+      document.getElementById("tab-story").innerHTML = `<h3>📖 Complete Story Narration</h3><p style="font-size:16px; line-height:1.8;">${story}</p>`;
     }
 
     function renderTeluguVoiceover(telugu) {
       document.getElementById("tab-telugu").innerHTML = `
         <h3>🎙️ Telugu Voiceover Script</h3>
-        <p class="telugu-text">${telugu || "Telugu content not generated."}</p>
+        <p class="telugu-text">${telugu}</p>
       `;
     }
 
@@ -298,31 +218,33 @@
         scenes.slice(0, 5).forEach((scene, index) => {
           html += `
             <div class="scene-box">
-              <div class="scene-title">Scene ${index + 1} (${scene.timeframe || '0:00'})</div>
-              <p><strong>Voiceover (English):</strong> ${scene.voiceover}</p>
+              <div class="scene-title">Scene ${index + 1} (${scene.timeframe || '0:10'})</div>
+              <p><strong>Voiceover:</strong> ${scene.voiceover}</p>
               <p><strong>Visual Prompt:</strong> <em>${scene.visual_prompt}</em></p>
               <p><span class="badge">Text on Screen</span> ${scene.text_on_screen}</p>
             </div>
           `;
         });
+      } else {
+        html += "<p>No scene breakdown available.</p>";
       }
       document.getElementById("tab-scenes").innerHTML = html;
     }
 
     function renderCharacterSheets(chars) {
       let html = "<h3>👤 Character Sheets</h3>";
-      if (Array.isArray(chars)) {
+      if (Array.isArray(chars) && chars.length > 0) {
         chars.forEach(c => {
           html += `
             <div class="char-card">
-              <h4>${c.name} (${c.role})</h4>
-              <p><strong>Visual Description:</strong> ${c.appearance}</p>
-              <p><strong>Personality:</strong> ${c.personality}</p>
+              <h4>${c.name} ${c.role ? '(' + c.role + ')' : ''}</h4>
+              <p><strong>Visual Description:</strong> ${c.appearance || 'N/A'}</p>
+              <p><strong>Personality:</strong> ${c.personality || 'N/A'}</p>
             </div>
           `;
         });
       } else {
-        html += "<p>No specific characters detected for this topic.</p>";
+        html += "<p>No character descriptions required for this concept.</p>";
       }
       document.getElementById("tab-chars").innerHTML = html;
     }
@@ -332,11 +254,11 @@
       let tagHtml = Array.isArray(tags) ? tags.map(t => `<span class="badge">#${t}</span> `).join('') : '';
 
       document.getElementById("tab-hook").innerHTML = `
-        <h3>🪝 Hook Line</h3>
-        <div class="scene-box"><p class="telugu-text" style="color:#00ff66;">"${hook}"</p></div>
+        <h3>🪝 Opening Hook</h3>
+        <div class="scene-box"><p class="telugu-text" style="color:#00ff66;">"${hook || ''}"</p></div>
         
         <h3>📢 Call To Action (CTA)</h3>
-        <div class="scene-box"><p>"${cta}"</p></div>
+        <div class="scene-box"><p>"${cta || ''}"</p></div>
 
         <h3>📌 Title Ideas</h3>
         <ul>${titleHtml}</ul>
