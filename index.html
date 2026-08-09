@@ -1,63 +1,88 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>YouTube Shorts Generator</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Shorts AI Generator</title>
+
 <style>
 body{
-font-family:Arial;
-max-width:800px;
+font-family:Arial,sans-serif;
+max-width:900px;
 margin:auto;
 padding:20px;
+background:#f4f4f4;
+}
+h1{
+text-align:center;
+}
+input{
+width:100%;
+padding:12px;
+margin-top:10px;
+}
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+font-size:16px;
 }
 textarea{
 width:100%;
-height:120px;
-}
-button{
-padding:10px 20px;
+height:400px;
 margin-top:10px;
 }
 </style>
 </head>
+
 <body>
 
-<h1>YouTube Shorts Generator</h1>
+<h1>YouTube Shorts AI Generator</h1>
 
-<input id="topic" placeholder="Story Topic" style="width:100%;padding:10px">
-
-<br><br>
+<input id="topic" placeholder="Enter Story Topic">
 
 <input id="scenes" type="number" placeholder="Number of Scenes">
 
-<br><br>
+<button onclick="generateStory()">
+Generate Story
+</button>
 
-<button onclick="generate()">Generate</button>
-
-<h3>Result</h3>
-
-<textarea id="result"></textarea>
+<textarea id="output"></textarea>
 
 <script>
 
-const API_KEY="YOUR_GEMINI_API_KEY";
+const API_KEY = "PASTE_YOUR_API_KEY_HERE";
 
-async function generate(){
+async function generateStory(){
 
-let topic=document.getElementById("topic").value;
-let scenes=document.getElementById("scenes").value;
+const topic =
+document.getElementById("topic").value;
 
-let prompt=
-`Create a viral YouTube Shorts story about ${topic}.
-Number of scenes: ${scenes}
+const scenes =
+document.getElementById("scenes").value;
+
+document.getElementById("output").value =
+"Generating...";
+
+const prompt = `
+Create a viral YouTube Shorts story.
+
+Topic: ${topic}
+
+Number of Scenes: ${scenes}
 
 Generate:
-1.Full Story
-2.Telugu Voiceover
-3.Scene Prompts
-4.Character Prompts`;
+1. Full Story
+2. Telugu Voiceover
+3. Scene Breakdown
+4. Scene Prompts
+5. Strong CTA
+`;
 
-let response=await fetch(
-`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+try{
+
+const response = await fetch(
+"https://yt-shorts-api.nvrsarma.workers.dev/",
 {
 method:"POST",
 headers:{
@@ -77,10 +102,18 @@ text:prompt
 }
 );
 
-let data=await response.json();
+const data = await response.json();
 
-document.getElementById("result").value=
+document.getElementById("output").value =
 data.candidates[0].content.parts[0].text;
+
+}catch(error){
+
+document.getElementById("output").value =
+"Error: " + error;
+
+}
+
 }
 
 </script>
