@@ -1,7 +1,7 @@
 async function generateStory() {
 
   // ============================================
-  // GET USER INPUT
+  // GET HTML ELEMENTS
   // ============================================
 
   const topicElement =
@@ -24,27 +24,35 @@ async function generateStory() {
 
 
   // ============================================
-  // CHECK HTML ELEMENTS
+  // CHECK REQUIRED ELEMENTS
   // ============================================
 
   if (!topicElement) {
+
     alert("Topic input not found.");
+
     return;
   }
+
 
   if (!languageElement) {
+
     alert("Language selector not found.");
+
     return;
   }
 
+
   if (!sceneCountElement) {
+
     alert("Scene count selector not found.");
+
     return;
   }
 
 
   // ============================================
-  // READ VALUES
+  // READ USER INPUT
   // ============================================
 
   const topic =
@@ -76,17 +84,39 @@ async function generateStory() {
 
 
   // ============================================
+  // VALIDATE SCENE COUNT
+  // ============================================
+
+  if (
+    !Number.isInteger(sceneCount) ||
+    sceneCount < 1
+  ) {
+
+    alert(
+      "Please select a valid number of scenes."
+    );
+
+    return;
+  }
+
+
+  // ============================================
   // SAVE STATE
   // ============================================
 
-  state.topic =
-    topic;
+  if (
+    typeof state !== "undefined"
+  ) {
 
-  state.language =
-    language;
+    state.topic =
+      topic;
 
-  state.sceneCount =
-    sceneCount;
+    state.language =
+      language;
+
+    state.sceneCount =
+      sceneCount;
+  }
 
 
   // ============================================
@@ -100,12 +130,11 @@ async function generateStory() {
 
     button.textContent =
       "⏳ Generating Story...";
-
   }
 
 
   // ============================================
-  // SHOW STATUS
+  // STATUS
   // ============================================
 
   if (
@@ -116,12 +145,11 @@ async function generateStory() {
       "Creating your story...",
       true
     );
-
   }
 
 
   // ============================================
-  // YOUR CLOUDFLARE WORKER URL
+  // CLOUDFLARE WORKER URL
   // ============================================
 
   const WORKER_URL =
@@ -131,7 +159,7 @@ async function generateStory() {
   try {
 
     // ==========================================
-    // SEND REQUEST TO CLOUDFLARE WORKER
+    // SEND REQUEST
     // ==========================================
 
     const response =
@@ -161,7 +189,7 @@ async function generateStory() {
 
 
     // ==========================================
-    // READ RESPONSE AS TEXT FIRST
+    // READ RESPONSE
     // ==========================================
 
     const rawResponse =
@@ -173,6 +201,7 @@ async function generateStory() {
       response.status
     );
 
+
     console.log(
       "WORKER RESPONSE:",
       rawResponse
@@ -180,7 +209,7 @@ async function generateStory() {
 
 
     // ==========================================
-    // CONVERT RESPONSE TO JSON
+    // PARSE JSON
     // ==========================================
 
     let data;
@@ -188,19 +217,25 @@ async function generateStory() {
     try {
 
       data =
-        JSON.parse(rawResponse);
+        JSON.parse(
+          rawResponse
+        );
 
-    } catch (error) {
+    } catch (jsonError) {
+
+      console.error(
+        "JSON ERROR:",
+        jsonError
+      );
 
       throw new Error(
         "Worker returned invalid JSON."
       );
-
     }
 
 
     // ==========================================
-    // CHECK WORKER RESPONSE
+    // CHECK HTTP STATUS
     // ==========================================
 
     if (!response.ok) {
@@ -209,40 +244,56 @@ async function generateStory() {
         data.error ||
         "Worker request failed."
       );
-
     }
 
 
-    if (!data.success) {
+    // ==========================================
+    // CHECK SUCCESS
+    // ==========================================
+
+    if (
+      data.success !== true
+    ) {
 
       throw new Error(
         data.error ||
         "Story generation failed."
       );
-
     }
 
 
     // ==========================================
-    // GET GENERATED STORY
+    // GET STORY
     // ==========================================
 
-    state.story =
-      data.content || "";
+    const generatedStory =
+      String(
+        data.content || ""
+      ).trim();
 
 
     // ==========================================
     // CHECK EMPTY STORY
     // ==========================================
 
-    if (
-      !state.story.trim()
-    ) {
+    if (!generatedStory) {
 
       throw new Error(
         "AI returned an empty story."
       );
+    }
 
+
+    // ==========================================
+    // SAVE STORY
+    // ==========================================
+
+    if (
+      typeof state !== "undefined"
+    ) {
+
+      state.story =
+        generatedStory;
     }
 
 
@@ -253,8 +304,7 @@ async function generateStory() {
     if (storyOutput) {
 
       storyOutput.textContent =
-        state.story;
-
+        generatedStory;
     }
 
 
@@ -271,7 +321,6 @@ async function generateStory() {
       storyCard.classList.add(
         "show"
       );
-
     }
 
 
@@ -284,12 +333,11 @@ async function generateStory() {
     ) {
 
       activateStep(2);
-
     }
 
 
     // ==========================================
-    // SUCCESS MESSAGE
+    // SUCCESS STATUS
     // ==========================================
 
     if (
@@ -299,7 +347,6 @@ async function generateStory() {
       showStatus(
         "✅ Story generated successfully."
       );
-
     }
 
 
@@ -309,18 +356,24 @@ async function generateStory() {
 
     if (storyCard) {
 
-      storyCard.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
+      setTimeout(
+        function () {
 
+          storyCard.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+
+        },
+        100
+      );
     }
 
 
   } catch (error) {
 
     // ==========================================
-    // ERROR HANDLING
+    // ERROR
     // ==========================================
 
     console.error(
@@ -329,27 +382,27 @@ async function generateStory() {
     );
 
 
+    const errorMessage =
+      error &&
+      error.message
+        ? error.message
+        : "Story generation failed.";
+
+
     if (
       typeof showStatus === "function"
     ) {
 
       showStatus(
         "❌ " +
-        (
-          error.message ||
-          "Story generation failed."
-        )
+        errorMessage
       );
-
     }
 
 
     alert(
       "Story generation failed:\n\n" +
-      (
-        error.message ||
-        "Unknown error"
-      )
+      errorMessage
     );
 
 
@@ -366,9 +419,6 @@ async function generateStory() {
 
       button.textContent =
         "✨ Generate Story";
-
     }
-
   }
-
 }
