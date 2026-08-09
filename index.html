@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>YouTube Shorts & Video Studio AI</title>
+  <title>YouTube Studio AI - Multi-Genre Script Generator</title>
   <style>
     :root {
       --primary: #ff0000;
@@ -20,7 +20,7 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background-color: var(--bg);
       color: var(--text);
-      max-width: 900px;
+      max-width: 950px;
       margin: 0 auto;
       padding: 30px 20px;
       line-height: 1.5;
@@ -53,6 +53,18 @@
       font-size: 15px;
       box-sizing: border-box;
       font-family: inherit;
+    }
+
+    optgroup {
+      font-weight: bold;
+      color: var(--primary);
+      background: #1a1a1a;
+    }
+
+    option {
+      color: #fff;
+      background: #121212;
+      padding: 4px;
     }
 
     textarea { resize: vertical; min-height: 120px; }
@@ -132,24 +144,51 @@
 
   <div class="input-card">
     
-    <!-- Genre & Topic Controls -->
+    <!-- Genre Categorized Options -->
     <div class="form-row">
-      <div class="form-group" style="flex: 0.8;">
-        <label for="genre">Content Genre:</label>
+      <div class="form-group" style="flex: 0.9;">
+        <label for="genre">Content Genre Category:</label>
         <select id="genre">
-          <option value="History & Mysteries" selected>🏛️ History & Mysteries</option>
-          <option value="Sci-Fi & Future Tech">🤖 Sci-Fi & Future Tech</option>
-          <option value="True Crime & Thriller">🕵️ True Crime & Thriller</option>
-          <option value="Mythology & Folklore">🔱 Mythology & Folklore</option>
-          <option value="Space & Cosmos">🌌 Space & Cosmos</option>
-          <option value="Motivation & Self-Growth">🔥 Motivation & Self-Growth</option>
+          <optgroup label="🏛️ History, Mythology & Epics">
+            <option value="Epics & Heroic Sagas" selected>⚔️ Epics & Heroic Sagas (Mahabharata, Ramayana)</option>
+            <option value="Ancient History & Civilizations">🏛️ Ancient History & Civilizations</option>
+            <option value="Mythology & Folklore">🔱 Mythology & Folklore</option>
+            <option value="Historical Mysteries">🏺 Historical Mysteries & Lost Treasures</option>
+          </optgroup>
+
+          <optgroup label="🌌 Science, Space & Tech">
+            <option value="Space & Cosmos">🌌 Space & Cosmos</option>
+            <option value="Sci-Fi & Future Tech">🤖 Sci-Fi & Future Tech</option>
+            <option value="Science Explainers">🔬 Science & Educational Explainers</option>
+          </optgroup>
+
+          <optgroup label="🕵️ Crime, Mystery & Horror">
+            <option value="True Crime & Heists">🕵️ True Crime & Heists</option>
+            <option value="Horror & Paranormal">👻 Horror & Paranormal Urban Legends</option>
+            <option value="Conspiracies & Secret Societies">👁️ Conspiracies & Secrets</option>
+          </optgroup>
+
+          <optgroup label="🔥 Growth, Mindset & Wealth">
+            <option value="Motivation & Mindset">🔥 Motivation & Mindset</option>
+            <option value="Finance & Money Hacks">💰 Finance & Money Hacks</option>
+          </optgroup>
+
+          <optgroup label="🎮 Gaming & Pop Culture">
+            <option value="Gaming & Lore">🎮 Gaming & Game Lore</option>
+            <option value="Movie & Pop Culture Analysis">🎬 Movie & Pop Culture Analysis</option>
+          </optgroup>
+
+          <optgroup label="✈️ Lifestyle & How-To">
+            <option value="Travel & Unexplored Places">🗺️ Travel & Unexplored Places</option>
+            <option value="Life Hacks & DIY">💡 Life Hacks & DIY</option>
+          </optgroup>
         </select>
       </div>
 
-      <div class="form-group" style="flex: 1.2;">
+      <div class="form-group" style="flex: 1.1;">
         <label for="topic">Topic / Story Idea:</label>
         <div class="topic-wrapper">
-          <input type="text" id="topic" placeholder="e.g., The secret kingdom of Vijayanagara">
+          <input type="text" id="topic" placeholder="e.g., The secret weapons of Kurukshetra war">
           <button class="random-btn" onclick="generateRandomTopic()">🎲 Random Topic</button>
         </div>
       </div>
@@ -226,49 +265,103 @@
   </div>
 
   <script>
-    // Genre-based Topic Prompts
+    // Detailed Categorized Topic Ideas
     const genreTopics = {
-      "History & Mysteries": [
+      "Epics & Heroic Sagas": [
+        "The secret divine weapons of Kurukshetra war in Mahabharata",
+        "How Lord Rama built the invincible stone bridge across the ocean",
+        "The tragedy of Karna: The most loyal warrior of Kurukshetra",
+        "The terrifying power of the Brahmashira Astra weapon"
+      ],
+      "Ancient History & Civilizations": [
         "The incredible secrets of Vijayanagara's musical pillars",
-        "The hidden underground chambers beneath Padmanabhaswamy Temple",
-        "How Ancient Indian builders created everlasting rock-cut temples",
-        "The mysterious disappearance of the Harappan civilization"
-      ],
-      "Sci-Fi & Future Tech": [
-        "How Artificial Intelligence will change our daily lives by 2030",
-        "What happens when Quantum Computers crack all world encryption",
-        "The dark side of Neuralink: Controlling thoughts with chips",
-        "Flying cars and AI cities: What the world looks like in 2050"
-      ],
-      "True Crime & Thriller": [
-        "The unsolved mystery of the DB Cooper plane heist",
-        "The bizarre story of a man who sold the Eiffel Tower twice",
-        "The mysterious disappearance of Flight 19 in the Bermuda Triangle",
-        "The darkest mastermind mind-games in history"
+        "How Ancient Egyptians aligned the Pyramids with Orion constellation",
+        "The lost underground city of Mohenjo-Daro and its mystery collapse",
+        "How King Ashoka created the secret order of 9 Unknown Men"
       ],
       "Mythology & Folklore": [
-        "The secret weapons of Mahabharata that resembled modern nukes",
-        "The real story behind Kakatiya Dynasty and Ramappa Temple",
-        "The legend of Chiranjeevis: Immortal beings in Indian mythology",
-        "The mysterious sea bridge built by Lord Rama in Ramayana"
+        "Chiranjeevis: The 7 immortals wandering Earth according to Hindu mythology",
+        "The real origins of the fearsome Yali creature on South Indian temples",
+        "The legend of the Golden Elixir hidden inside Mount Kailash",
+        "The mysterious powers of the Syamantaka Gem"
+      ],
+      "Historical Mysteries": [
+        "The hidden treasure vaults beneath Padmanabhaswamy Temple Vault B",
+        "The uncrackable secret of the Delhi Rust-Free Iron Pillar",
+        "How the 250-ton Krishna's Butterball stone defies gravity",
+        "The disappearance of the Koh-i-Noor diamond's cursed twin"
       ],
       "Space & Cosmos": [
         "5 Bizarre facts about Black Holes that physics can't explain",
         "What happens if a giant Asteroid hits the Pacific Ocean tomorrow?",
-        "The secret ocean beneath Jupiter's moon Europa",
-        "How big is the observable Universe compared to an atom?"
+        "The secret ocean beneath Jupiter's moon Europa that could host life",
+        "How big is the observable Universe compared to a single atom?"
       ],
-      "Motivation & Self-Growth": [
-        "The 1-minute Japanese technique to overcome laziness forever",
-        "How Stoic philosophy can make you completely immune to stress",
+      "Sci-Fi & Future Tech": [
+        "How Artificial Intelligence will change human daily lives by 2030",
+        "What happens when Quantum Computers crack all world encryption",
+        "The dark side of Neuralink: Brain chips controlling memories",
+        "Flying cars and AI cities: What Earth looks like in 2050"
+      ],
+      "Science Explainers": [
+        "How sound waves can float solid objects in mid-air using acoustic levitation",
+        "What happens to the human brain during sleep paralysis?",
+        "The bizarre Quantum Physics experiment that proves reality is an illusion",
+        "Why time moves slower near supermassive objects"
+      ],
+      "True Crime & Heists": [
+        "The unsolved mystery of the DB Cooper plane heist",
+        "The bizarre story of a man who sold the Eiffel Tower twice",
+        "The mysterious disappearance of Flight 19 in the Bermuda Triangle",
+        "The darkest criminal mastermind mind-games in history"
+      ],
+      "Horror & Paranormal": [
+        "The haunting legend of Bhangarh Fort: India's most forbidden castle",
+        "The mysterious disappearance of the entire village of Kuldhara overnight",
+        "The real demonic entity that inspired urban ghost legends",
+        "Why ancient civilizations feared the Midnight Witching Hour"
+      ],
+      "Conspiracies & Secrets": [
+        "The secret chamber behind the Great Sphinx's right paw",
+        "Area 51 secrets leaked by former engineers",
+        "The voynich manuscript: The mysterious book no cryptographer can decode"
+      ],
+      "Motivation & Mindset": [
+        "The 1-minute Japanese Kaizen technique to overcome laziness forever",
+        "How Stoic philosophy can make you immune to emotional stress",
         "The Monk mindset: How to master focus in a world of distractions",
-        "3 Habits that will put you in the top 1% of achievers"
+        "3 Habits that put you in the top 1% of achievers"
+      ],
+      "Finance & Money Hacks": [
+        "How compound interest can turn $100 a month into 1 million dollars",
+        "The psychology of money: How rich people think differently",
+        "How modern central banks print money out of thin air"
+      ],
+      "Gaming & Lore": [
+        "The darkest lore secrets hidden inside Elden Ring",
+        "How GTA 6's AI will change open-world gaming forever",
+        "The tragic story of Arthas Menethil in Warcraft lore"
+      ],
+      "Movie & Pop Culture Analysis": [
+        "Hidden philosophical symbolism inside Christopher Nolan movies",
+        "Why the original Matrix trilogy foresaw the modern AI era",
+        "The psychological masterclass behind Joker's character arc"
+      ],
+      "Travel & Unexplored Places": [
+        "Snake Island: The forbidden place where humans are banned",
+        "The glowing blue water beaches of Vaadhoo Island",
+        "The eternal flame falls: A waterfall with a fire burning inside"
+      ],
+      "Life Hacks & DIY": [
+        "3 Memory tricks used by memory champions to memorize anything",
+        "How to body-language hack any interview or conversation instantly",
+        "How to fix your sleep cycle in 24 hours"
       ]
     };
 
     function generateRandomTopic() {
       const selectedGenre = document.getElementById("genre").value;
-      const topicsList = genreTopics[selectedGenre] || genreTopics["History & Mysteries"];
+      const topicsList = genreTopics[selectedGenre] || genreTopics["Epics & Heroic Sagas"];
       const randomIndex = Math.floor(Math.random() * topicsList.length);
       document.getElementById("topic").value = topicsList[randomIndex];
     }
