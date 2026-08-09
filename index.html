@@ -1,47 +1,148 @@
 async function generateStory() {
 
-  const topic =
-    document.getElementById("topic").value.trim();
+  // ============================================
+  // GET USER INPUT
+  // ============================================
 
-  const language =
-    document.getElementById("language").value;
+  const topicElement =
+    document.getElementById("topic");
 
-  const sceneCount =
-    Number(
-      document.getElementById("sceneCount").value
-    );
+  const languageElement =
+    document.getElementById("language");
 
-  if (!topic) {
-    alert("Please enter a story topic first.");
+  const sceneCountElement =
+    document.getElementById("sceneCount");
+
+  const button =
+    document.getElementById("generateStoryBtn");
+
+  const storyOutput =
+    document.getElementById("storyOutput");
+
+  const storyCard =
+    document.getElementById("storyCard");
+
+
+  // ============================================
+  // CHECK HTML ELEMENTS
+  // ============================================
+
+  if (!topicElement) {
+    alert("Topic input not found.");
     return;
   }
 
-  state.topic = topic;
-  state.language = language;
-  state.sceneCount = sceneCount;
+  if (!languageElement) {
+    alert("Language selector not found.");
+    return;
+  }
 
-  showStatus(
-    "Creating your story...",
-    true
-  );
+  if (!sceneCountElement) {
+    alert("Scene count selector not found.");
+    return;
+  }
 
-  const button =
-    document.getElementById(
-      "generateStoryBtn"
+
+  // ============================================
+  // READ VALUES
+  // ============================================
+
+  const topic =
+    topicElement.value.trim();
+
+  const language =
+    languageElement.value;
+
+  const sceneCount =
+    Number(
+      sceneCountElement.value
     );
 
-  button.disabled = true;
+
+  // ============================================
+  // VALIDATE TOPIC
+  // ============================================
+
+  if (!topic) {
+
+    alert(
+      "Please enter a story topic first."
+    );
+
+    topicElement.focus();
+
+    return;
+  }
+
+
+  // ============================================
+  // SAVE STATE
+  // ============================================
+
+  state.topic =
+    topic;
+
+  state.language =
+    language;
+
+  state.sceneCount =
+    sceneCount;
+
+
+  // ============================================
+  // BUTTON LOADING
+  // ============================================
+
+  if (button) {
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "⏳ Generating Story...";
+
+  }
+
+
+  // ============================================
+  // SHOW STATUS
+  // ============================================
+
+  if (
+    typeof showStatus === "function"
+  ) {
+
+    showStatus(
+      "Creating your story...",
+      true
+    );
+
+  }
+
+
+  // ============================================
+  // YOUR CLOUDFLARE WORKER URL
+  // ============================================
+
+  const WORKER_URL =
+    "https://yt-shorts-api.nvrsarma.workers.dev/";
+
 
   try {
 
+    // ==========================================
+    // SEND REQUEST TO CLOUDFLARE WORKER
+    // ==========================================
+
     const response =
       await fetch(
-        API_URL,
+        WORKER_URL,
         {
           method: "POST",
 
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type":
+              "application/json"
           },
 
           body: JSON.stringify({
@@ -58,15 +159,61 @@ async function generateStory() {
         }
       );
 
-    const data =
-      await response.json();
+
+    // ==========================================
+    // READ RESPONSE AS TEXT FIRST
+    // ==========================================
+
+    const rawResponse =
+      await response.text();
+
 
     console.log(
-      "STORY RESPONSE:",
-      data
+      "WORKER STATUS:",
+      response.status
     );
 
-    if (!response.ok || !data.success) {
+    console.log(
+      "WORKER RESPONSE:",
+      rawResponse
+    );
+
+
+    // ==========================================
+    // CONVERT RESPONSE TO JSON
+    // ==========================================
+
+    let data;
+
+    try {
+
+      data =
+        JSON.parse(rawResponse);
+
+    } catch (error) {
+
+      throw new Error(
+        "Worker returned invalid JSON."
+      );
+
+    }
+
+
+    // ==========================================
+    // CHECK WORKER RESPONSE
+    // ==========================================
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        "Worker request failed."
+      );
+
+    }
+
+
+    if (!data.success) {
 
       throw new Error(
         data.error ||
@@ -75,48 +222,153 @@ async function generateStory() {
 
     }
 
+
+    // ==========================================
+    // GET GENERATED STORY
+    // ==========================================
+
     state.story =
       data.content || "";
 
-    document.getElementById(
-      "storyOutput"
-    ).textContent =
-      state.story;
 
-    document.getElementById(
-      "storyCard"
-    ).classList.add("show");
+    // ==========================================
+    // CHECK EMPTY STORY
+    // ==========================================
 
-    activateStep(2);
+    if (
+      !state.story.trim()
+    ) {
 
-    showStatus(
-      "Story generated successfully."
-    );
+      throw new Error(
+        "AI returned an empty story."
+      );
 
-    document.getElementById(
-      "storyCard"
-    ).scrollIntoView({
-      behavior: "smooth"
-    });
+    }
 
-  }
 
-  catch (error) {
+    // ==========================================
+    // DISPLAY STORY
+    // ==========================================
+
+    if (storyOutput) {
+
+      storyOutput.textContent =
+        state.story;
+
+    }
+
+
+    // ==========================================
+    // SHOW STORY CARD
+    // ==========================================
+
+    if (storyCard) {
+
+      storyCard.classList.remove(
+        "hidden"
+      );
+
+      storyCard.classList.add(
+        "show"
+      );
+
+    }
+
+
+    // ==========================================
+    // ACTIVATE STORY STEP
+    // ==========================================
+
+    if (
+      typeof activateStep === "function"
+    ) {
+
+      activateStep(2);
+
+    }
+
+
+    // ==========================================
+    // SUCCESS MESSAGE
+    // ==========================================
+
+    if (
+      typeof showStatus === "function"
+    ) {
+
+      showStatus(
+        "✅ Story generated successfully."
+      );
+
+    }
+
+
+    // ==========================================
+    // SCROLL TO STORY
+    // ==========================================
+
+    if (storyCard) {
+
+      storyCard.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    }
+
+
+  } catch (error) {
+
+    // ==========================================
+    // ERROR HANDLING
+    // ==========================================
 
     console.error(
       "STORY ERROR:",
       error
     );
 
-    showStatus(
-      error.message
+
+    if (
+      typeof showStatus === "function"
+    ) {
+
+      showStatus(
+        "❌ " +
+        (
+          error.message ||
+          "Story generation failed."
+        )
+      );
+
+    }
+
+
+    alert(
+      "Story generation failed:\n\n" +
+      (
+        error.message ||
+        "Unknown error"
+      )
     );
 
+
+  } finally {
+
+    // ==========================================
+    // RESTORE BUTTON
+    // ==========================================
+
+    if (button) {
+
+      button.disabled =
+        false;
+
+      button.textContent =
+        "✨ Generate Story";
+
+    }
+
   }
 
-  finally {
-
-    button.disabled = false;
-
-  }
 }
