@@ -132,7 +132,7 @@
 <body>
 
   <h1>🎬 YouTube Studio AI</h1>
-  <p class="subtitle">Generate multi-lingual scripts, genre-driven stories, voiceovers, character master prompts & scene breakdowns</p>
+  <p class="subtitle">Generate multi-lingual scripts, documentaries, voiceovers, character sheets & 8-10s scene breakdowns</p>
 
   <div class="input-card">
     
@@ -192,8 +192,11 @@
         <label for="duration">Target Duration:</label>
         <select id="duration">
           <option value="30s">30 Seconds (3 Scenes, ~8-10s each)</option>
-          <option value="60s" selected>60 Seconds (6 Scenes, ~8-10s each)</option>
-          <option value="3m">Up to 3 Minutes (18 Scenes, ~8-10s each)</option>
+          <option value="60s">60 Seconds (6 Scenes, ~8-10s each)</option>
+          <option value="3m">3 Minutes (18 Scenes, ~8-10s each)</option>
+          <option value="10m">10 Minutes (60 Scenes, ~8-10s each)</option>
+          <option value="30m">30 Minutes (180 Scenes, ~8-10s each)</option>
+          <option value="1h" selected>Up to 1 Hour (360 Scenes, ~8-10s each)</option>
         </select>
       </div>
 
@@ -220,7 +223,7 @@
   </div>
 
   <div class="loading-spinner" id="spinner">
-    ⏳ Processing request via Cloudflare Worker...
+    ⏳ Processing request via Cloudflare Worker... (Longer durations may take 15-30s)
   </div>
 
   <div class="tabs-container" id="tabsContainer">
@@ -442,7 +445,7 @@
     }
 
     function renderFullStory(story) {
-      document.getElementById("tab-story").innerHTML = `<h3>📖 Complete Narrative Story</h3><p style="font-size:16px; line-height:1.8;">${story}</p>`;
+      document.getElementById("tab-story").innerHTML = `<h3>📖 Complete Narrative Story / Documentary Outline</h3><p style="font-size:16px; line-height:1.8;">${story}</p>`;
     }
 
     function renderLanguageVoiceover(text, lang) {
