@@ -55,18 +55,8 @@
       font-family: inherit;
     }
 
-    optgroup {
-      font-weight: bold;
-      color: var(--primary);
-      background: #1a1a1a;
-    }
-
-    option {
-      color: #fff;
-      background: #121212;
-      padding: 4px;
-    }
-
+    optgroup { font-weight: bold; color: var(--primary); background: #1a1a1a; }
+    option { color: #fff; background: #121212; padding: 4px; }
     textarea { resize: vertical; min-height: 120px; }
 
     .topic-wrapper { display: flex; gap: 10px; }
@@ -132,7 +122,9 @@
     .scene-title { color: var(--primary); font-weight: bold; margin-bottom: 8px; }
     .badge { display: inline-block; padding: 4px 8px; background: #333; border-radius: 4px; font-size: 12px; margin-bottom: 8px; }
     .telugu-text { font-size: 18px; line-height: 1.8; color: #38bdf8; font-family: 'Gautami', 'Mandali', sans-serif; }
-    .char-card { border-left: 4px solid var(--accent); background: #181818; padding: 12px 16px; margin-bottom: 12px; border-radius: 0 8px 8px 0; }
+    .char-card { border-left: 4px solid var(--accent); background: #181818; padding: 16px; margin-bottom: 16px; border-radius: 0 8px 8px 0; }
+    .master-prompt-box { background: #111; border: 1px solid #38bdf8; padding: 16px; border-radius: 8px; margin-bottom: 24px; }
+    .master-prompt-box code { color: #38bdf8; font-size: 14px; word-break: break-all; white-space: pre-wrap; }
     .loading-spinner { text-align: center; padding: 40px; color: var(--text-muted); display: none; }
     .translator-box { background: #161616; border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-top: 15px; }
   </style>
@@ -140,7 +132,7 @@
 <body>
 
   <h1>🎬 YouTube Studio AI</h1>
-  <p class="subtitle">Generate multi-lingual scripts, genre-driven stories, voiceovers & 8-10s scene breakdowns</p>
+  <p class="subtitle">Generate multi-lingual scripts, genre-driven stories, voiceovers, character master prompts & scene breakdowns</p>
 
   <div class="input-card">
     
@@ -236,7 +228,7 @@
       <button class="tab-btn active" onclick="switchTab('tab-story', event)">📖 Full Story</button>
       <button class="tab-btn" onclick="switchTab('tab-lang', event)">🎙️ Voiceover Script</button>
       <button class="tab-btn" onclick="switchTab('tab-scenes', event)">🎬 Scene Breakdown (8-10s Each)</button>
-      <button class="tab-btn" onclick="switchTab('tab-chars', event)">👤 Character Sheets</button>
+      <button class="tab-btn" onclick="switchTab('tab-chars', event)">👤 Character Sheets & Master Prompt</button>
       <button class="tab-btn" onclick="switchTab('tab-hook', event)">🪝 Hook & CTA</button>
       <button class="tab-btn" onclick="switchTab('tab-translator', event)">🔄 Telugu Translator</button>
     </div>
@@ -406,7 +398,7 @@
         renderFullStory(storyContent || "No story generated.");
         renderLanguageVoiceover(data.translated_voiceover || storyContent, language);
         renderScenes(data.scene_breakdown);
-        renderCharacterSheets(data.character_sheets);
+        renderCharacterSheets(data.character_sheets, data.character_master_prompt);
         renderHookCTA(data.hook, data.call_to_action, data.titles, data.description, data.tags);
 
         tabsContainer.style.display = "block";
@@ -479,20 +471,32 @@
       document.getElementById("tab-scenes").innerHTML = html;
     }
 
-    function renderCharacterSheets(chars) {
-      let html = "<h3>👤 Character Sheets</h3>";
+    function renderCharacterSheets(chars, masterPrompt) {
+      let html = "<h3>👤 Character Sheets & Visual Consistency Engine</h3>";
+
+      if (masterPrompt) {
+        html += `
+          <div class="master-prompt-box">
+            <h4 style="color:#38bdf8; margin-top:0;">🎨 AI Character Sheet Master Prompt (Midjourney / Leonardo / Flux)</h4>
+            <p style="font-size:13px; color:#aaa; margin-bottom:8px;">Copy and paste this master prompt into Midjourney or Leonardo AI to generate consistent multi-angle character reference sheets:</p>
+            <code>${masterPrompt}</code>
+          </div>
+        `;
+      }
+
       if (Array.isArray(chars) && chars.length > 0) {
         chars.forEach(c => {
           html += `
             <div class="char-card">
-              <h4>${c.name} ${c.role ? '(' + c.role + ')' : ''}</h4>
+              <h4 style="margin-top:0;">${c.name} ${c.role ? '(' + c.role + ')' : ''}</h4>
               <p><strong>Visual Description:</strong> ${c.appearance || 'N/A'}</p>
-              <p><strong>Personality:</strong> ${c.personality || 'N/A'}</p>
+              <p><strong>Personality Traits:</strong> ${c.personality || 'N/A'}</p>
+              ${c.individual_image_prompt ? `<p><strong>Individual AI Prompt:</strong> <em>${c.individual_image_prompt}</em></p>` : ''}
             </div>
           `;
         });
       } else {
-        html += "<p>No character descriptions required for this concept.</p>";
+        html += "<p>No specific character profiles required for this concept.</p>";
       }
       document.getElementById("tab-chars").innerHTML = html;
     }
