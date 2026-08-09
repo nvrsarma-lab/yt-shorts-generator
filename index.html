@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>YouTube Shorts Studio AI</title>
+  <title>YouTube Shorts & Video Studio AI</title>
   <style>
     :root {
       --primary: #ff0000;
@@ -38,6 +38,9 @@
     }
 
     .form-group { margin-bottom: 15px; }
+    .form-row { display: flex; gap: 15px; }
+    .form-row .form-group { flex: 1; }
+
     label { font-weight: 600; display: block; margin-bottom: 8px; color: #ddd; }
 
     input, select {
@@ -50,6 +53,23 @@
       font-size: 15px;
       box-sizing: border-box;
     }
+
+    .topic-wrapper {
+      display: flex;
+      gap: 10px;
+    }
+
+    button.random-btn {
+      background-color: #333;
+      color: white;
+      border: 1px solid var(--border);
+      padding: 0 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    button.random-btn:hover { background-color: #444; }
 
     button.gen-btn {
       width: 100%;
@@ -99,56 +119,98 @@
     .scene-box { border: 1px solid var(--border); background-color: #161616; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
     .scene-title { color: var(--primary); font-weight: bold; margin-bottom: 8px; }
     .badge { display: inline-block; padding: 4px 8px; background: #333; border-radius: 4px; font-size: 12px; margin-bottom: 8px; }
-    .telugu-text { font-size: 18px; line-height: 1.8; color: #38bdf8; }
+    .translated-text { font-size: 18px; line-height: 1.8; color: #38bdf8; }
     .char-card { border-left: 4px solid var(--accent); background: #181818; padding: 12px 16px; margin-bottom: 12px; border-radius: 0 8px 8px 0; }
     .loading-spinner { text-align: center; padding: 40px; color: var(--text-muted); display: none; }
   </style>
 </head>
 <body>
 
-  <h1>🎬 YouTube Shorts Studio AI</h1>
-  <p class="subtitle">Generate multi-lingual scripts, Telugu voiceovers, character sheets & scene breakdowns</p>
+  <h1>🎬 YouTube Studio AI</h1>
+  <p class="subtitle">Generate multi-lingual scripts, voiceovers, character sheets & scene breakdowns</p>
 
   <div class="input-card">
     <div class="form-group">
       <label for="topic">Topic / Story Idea:</label>
-      <input type="text" id="topic" placeholder="e.g., The secret kingdom of vijayanagara">
+      <div class="topic-wrapper">
+        <input type="text" id="topic" placeholder="e.g., The secret kingdom of Vijayanagara">
+        <button class="random-btn" onclick="generateRandomTopic()">🎲 Random Topic</button>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="tone">Tone:</label>
-      <select id="tone">
-        <option value="dramatic">Dramatic / Cinematic</option>
-        <option value="engaging">Engaging / Energetic</option>
-        <option value="educational">Educational / Historical</option>
-        <option value="mysterious">Mysterious / Thrilling</option>
-      </select>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="duration">Target Duration:</label>
+        <select id="duration">
+          <option value="30s">30 Seconds (Fast Short)</option>
+          <option value="60s" selected>60 Seconds (Standard Short)</option>
+          <option value="3m">Up to 3 Minutes (In-Depth Short/Video)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="language">Voiceover Language:</label>
+        <select id="language">
+          <option value="Telugu" selected>Telugu (తెలుగు)</option>
+          <option value="English">English</option>
+          <option value="Hindi">Hindi (हिंदी)</option>
+          <option value="Tamil">Tamil (தமிழ்)</option>
+          <option value="Spanish">Spanish</option>
+          <option value="French">French</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="tone">Tone:</label>
+        <select id="tone">
+          <option value="dramatic">Dramatic / Cinematic</option>
+          <option value="engaging">Engaging / Energetic</option>
+          <option value="educational">Educational / Historical</option>
+          <option value="mysterious">Mysterious / Thrilling</option>
+        </select>
+      </div>
     </div>
 
     <button class="gen-btn" onclick="generateShort()" id="genBtn">Generate Studio Assets</button>
   </div>
 
   <div class="loading-spinner" id="spinner">
-    ⏳ Generating full story assets, Telugu audio scripts, and character sheets...
+    ⏳ Generating narrative story assets, audio scripts, and scene breakdowns...
   </div>
 
   <div class="tabs-container" id="tabsContainer">
     <div class="tabs-header">
       <button class="tab-btn active" onclick="switchTab('tab-story', event)">📖 Full Story</button>
-      <button class="tab-btn" onclick="switchTab('tab-telugu', event)">🎙️ Telugu Voiceover</button>
-      <button class="tab-btn" onclick="switchTab('tab-scenes', event)">🎬 Scene Breakdown (5 Scenes)</button>
+      <button class="tab-btn" onclick="switchTab('tab-lang', event)">🎙️ Voiceover Script</button>
+      <button class="tab-btn" onclick="switchTab('tab-scenes', event)">🎬 Scene Breakdown</button>
       <button class="tab-btn" onclick="switchTab('tab-chars', event)">👤 Character Sheets</button>
       <button class="tab-btn" onclick="switchTab('tab-hook', event)">🪝 Hook & CTA</button>
     </div>
 
     <div id="tab-story" class="tab-content active"></div>
-    <div id="tab-telugu" class="tab-content"></div>
+    <div id="tab-lang" class="tab-content"></div>
     <div id="tab-scenes" class="tab-content"></div>
     <div id="tab-chars" class="tab-content"></div>
     <div id="tab-hook" class="tab-content"></div>
   </div>
 
   <script>
+    const sampleTopics = [
+      "The Lost City of Atlantis and its true coordinates",
+      "How Ancient Egyptians built the Pyramids using sound frequencies",
+      "The mysterious disappearance of Flight 19 in the Bermuda Triangle",
+      "5 Bizarre facts about Black Holes that physics can't explain",
+      "The incredible secrets of Vijayanagara's musical pillars",
+      "What happens to your brain during sleep paralysis",
+      "The hidden treasure chambers beneath Padmanabhaswamy Temple",
+      "How Artificial Intelligence will change the world by 2030"
+    ];
+
+    function generateRandomTopic() {
+      const randomIndex = Math.floor(Math.random() * sampleTopics.length);
+      document.getElementById("topic").value = sampleTopics[randomIndex];
+    }
+
     function switchTab(tabId, evt) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -159,12 +221,14 @@
 
     async function generateShort() {
       const topic = document.getElementById("topic").value.trim();
+      const duration = document.getElementById("duration").value;
+      const language = document.getElementById("language").value;
       const tone = document.getElementById("tone").value;
       const genBtn = document.getElementById("genBtn");
       const spinner = document.getElementById("spinner");
       const tabsContainer = document.getElementById("tabsContainer");
 
-      if (!topic) return alert("Please enter a topic!");
+      if (!topic) return alert("Please enter a topic or click Random Topic!");
 
       genBtn.disabled = true;
       spinner.style.display = "block";
@@ -174,20 +238,19 @@
         const response = await fetch("https://yt-shorts-api.nvrsarma.workers.dev/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ topic, tone })
+          body: JSON.stringify({ topic, duration, language, tone })
         });
 
         const data = await response.json();
         if (data.error) throw new Error(data.error);
 
-        // Fallback generator: assemble combined story if model skips full_story key
         let storyContent = data.full_story;
         if (!storyContent && Array.isArray(data.scene_breakdown)) {
           storyContent = data.scene_breakdown.map(s => s.voiceover).join(" ");
         }
 
-        renderFullStory(storyContent || "No narrative story generated.");
-        renderTeluguVoiceover(data.telugu_voiceover || "తెలుగు వాయిస్ ఓవర్ స్క్రిప్ట్ సిద్ధంగా ఉంది.");
+        renderFullStory(storyContent || "No story generated.");
+        renderLanguageVoiceover(data.translated_voiceover || storyContent, language);
         renderScenes(data.scene_breakdown);
         renderCharacterSheets(data.character_sheets);
         renderHookCTA(data.hook, data.call_to_action, data.titles, data.description, data.tags);
@@ -202,20 +265,20 @@
     }
 
     function renderFullStory(story) {
-      document.getElementById("tab-story").innerHTML = `<h3>📖 Complete Story Narration</h3><p style="font-size:16px; line-height:1.8;">${story}</p>`;
+      document.getElementById("tab-story").innerHTML = `<h3>📖 Complete Narrative Story</h3><p style="font-size:16px; line-height:1.8;">${story}</p>`;
     }
 
-    function renderTeluguVoiceover(telugu) {
-      document.getElementById("tab-telugu").innerHTML = `
-        <h3>🎙️ Telugu Voiceover Script</h3>
-        <p class="telugu-text">${telugu}</p>
+    function renderLanguageVoiceover(text, lang) {
+      document.getElementById("tab-lang").innerHTML = `
+        <h3>🎙️ ${lang} Voiceover Script</h3>
+        <p class="translated-text">${text}</p>
       `;
     }
 
     function renderScenes(scenes) {
-      let html = "<h3>🎬 5-Scene Breakdown</h3>";
+      let html = "<h3>🎬 Scene Breakdown</h3>";
       if (Array.isArray(scenes)) {
-        scenes.slice(0, 5).forEach((scene, index) => {
+        scenes.forEach((scene, index) => {
           html += `
             <div class="scene-box">
               <div class="scene-title">Scene ${index + 1} (${scene.timeframe || '0:10'})</div>
@@ -255,7 +318,7 @@
 
       document.getElementById("tab-hook").innerHTML = `
         <h3>🪝 Opening Hook</h3>
-        <div class="scene-box"><p class="telugu-text" style="color:#00ff66;">"${hook || ''}"</p></div>
+        <div class="scene-box"><p class="translated-text" style="color:#00ff66;">"${hook || ''}"</p></div>
         
         <h3>📢 Call To Action (CTA)</h3>
         <div class="scene-box"><p>"${cta || ''}"</p></div>
